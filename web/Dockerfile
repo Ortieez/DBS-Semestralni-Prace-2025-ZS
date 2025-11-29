@@ -26,10 +26,11 @@ ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 viteuser
 
+# Install serve globally for serving static files
+RUN npm install -g serve
+
 # Copy built files from builder
 COPY --from=builder --chown=viteuser:nodejs /app/dist ./dist
-COPY --from=builder --chown=viteuser:nodejs /app/package.json ./package.json
-COPY --from=builder --chown=viteuser:nodejs /app/node_modules ./node_modules
 
 USER viteuser
 
@@ -37,5 +38,5 @@ EXPOSE 3000
 
 ENV PORT 3000
 
-# Run the Vite preview server
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3000"]
+# Serve the built static files with serve
+CMD ["serve", "-s", "dist", "-l", "3000"]
