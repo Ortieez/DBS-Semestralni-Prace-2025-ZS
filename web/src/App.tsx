@@ -3,7 +3,8 @@ import SqlJsPage from "./components/SQLDatabase.tsx"
 
 import 'winbox/dist/css/winbox.min.css'
 import WinBox from 'react-winbox'
-import { useState } from "react"
+import {useEffect, useState} from "react"
+import initSqlJs, {type Database} from "sql.js";
 
 function App() {
 
@@ -11,6 +12,16 @@ function App() {
     const [showMail, setShowMail] = useState(false)
     const [showTerminal, setShowTerminal] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [db, setDb] = useState<Database | null>(null)
+
+
+    useEffect(() => {
+        initSqlJs({
+            locateFile: (file) => `https://sql.js.org/dist/${file}`,
+        })
+            .then((SQL) => setDb(new SQL.Database()))
+            .catch((err) => console.error(err))
+    }, [])
 
     const openApp = (who: string) => {
         if (loading) return
@@ -51,7 +62,7 @@ function App() {
                     background={"#808080"}
                     onclose={() => setShowTerminal(false)}
                 >
-                    <SqlJsPage/>
+                    <SqlJsPage loadedDb={db}/>
                 </WinBox>
             )}
 

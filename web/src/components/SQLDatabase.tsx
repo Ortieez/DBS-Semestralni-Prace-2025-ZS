@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react"
-import initSqlJs, { type Database } from "sql.js"
+import { type Database } from "sql.js"
 
 interface HistoryEntry {
     input: string
@@ -12,18 +12,16 @@ interface ResultTableProps {
     values: any[][]
 }
 
-export default function SqlJsPage() {
+export default function SqlJsPage(props: { loadedDb: Database | null }) {
     const [db, setDb] = useState<Database | null>(null)
     const [history, setHistory] = useState<HistoryEntry[]>([])
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
-        initSqlJs({
-            locateFile: (file) => `https://sql.js.org/dist/${file}`,
-        })
-            .then((SQL) => setDb(new SQL.Database()))
-            .catch((err) => console.error(err))
-    }, [])
+        if (!props.loadedDb) return;
+
+        setDb(props.loadedDb);
+    }, [props.loadedDb])
 
     const runCommand = (cmd: string) => {
         if (!db) return
