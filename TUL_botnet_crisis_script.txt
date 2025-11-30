@@ -1,0 +1,220 @@
+T U L :   B O T N E T   C R I S I S
+--------------------------------------------------------------------------------------------
+
+***DISCLAIMER***
+Actual TUL emplyees are far more competent, than the characters in this game.
+
+
+
+*******************************************************************************************
+INTRO:
+*******************************************************************************************
+
+
+
+Saturday evening. You're sitting in your cozy bedroom, enjoying a well deserved rest time.
+The rain softly drizzels outside and harmonises with your favorite relaxing music. The
+scent of a freshly brewed tea fills the air.
+…
+
+Suddenly a notification interrupts your thoughts…
+
+--------------------------------------------------------------------------------------------
+Email from rector:
+
+
+FROM:    rector@tul.cz
+SUBJECT: !URGENT! University under attack
+
+TUL is under attack! A vile university has shattered our infrastructure with a devastating
+botnet attack. Our best IT specialist is doing his best to stop it, but he got stuck.
+He will do his best to help you.
+
+Help me <username>, you're my only hope...
+
+Desperatly,
+
+Rector
+---------------------------------------------------------------------------------------------
+
+This really wasn't your plan for saturday evening, but as the rector said: You're their only
+hope...
+
+*sigh* "Looks like I have no choice…"
+
+Another notification
+
+---------------------------------------------------------------------------------------------
+Email from IT expert
+
+
+FROM:    itexpert@tul.cz
+SUBJECT: botnet
+
+Hello <username>,
+
+I don't like to admit it, but I'm lost. Hope you can help me. The attack is comming from
+this IP address: ? 174.156.12.4 ? We have to figure out, which device is the source and
+delete the botnet script. They have a nasty firewall however. We need to dispose it first.
+This should work:
+
+UPDATE Firewall
+SET status = 'inactive'
+WHERE level = 1
+---------------------------------------------------------------------------------------------
+
+
+"Great. So the IT expert is lost and they want ME to figure it out… Whatever, I'll do my
+best."
+
+You take one last look outside and then you fire up a terminal. Laser focused.
+
+
+
+
+
+
+*********************************************************************************************
+SECTION #1
+*********************************************************************************************
+
+// a terminal opens up, saying CONNECT TO
+// player enters IP from the email
+// player is taken to an SQL query environment
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  UPDATE Firewall         |
+|  SET status = 'inactive' |
+|  WHERE level = 1         |
+----------------------------
+
+// prompt: Enter password
+// player enters (wrong) password
+
+ACCESS DENIED
+Incorrect password
+
+---------------------------------------------------------------------------------------------
+Email from IT expert
+
+
+FROM:    itexpert@tul.cz
+SUBJECT: firewall
+
+Sorry, forgot to tell you… The firewall is password protected. I wasn't able to find the
+correct password yet. Perhaps some hints could be hidden in some files on the local PCs.
+You could try to access a PC with the default username "student"...
+---------------------------------------------------------------------------------------------
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  SELECT password         |
+|  FROM Users              |
+|  WHERE name = 'student'  |
+----------------------------
+
+// returns: student
+
+
+---------------------------------------------------------------------------------------------
+Email from IT expert
+
+
+FROM:    itexpert@tul.cz
+SUBJECT: notes
+
+Oh, one more thing. All of my notes are here for you. Maybe they could help. You can
+access the list of available notes with this command:
+
+SELECT id, title
+FROM Hints
+
+And to access a specific note, use this one:
+
+SELECT text
+FROM Hints
+WHERE id = <id of desired hint>
+
+or
+
+SELECT text
+FROM Hints
+WHERE title = <title of desired hint>
+
+
+Good luck, youngster!
+---------------------------------------------------------------------------------------------
+
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  INSERT INTO has_access  |
+|  VALUES (1, student)     |
+----------------------------
+
+// prompt: enter password (user enters 'student')
+// pc 1 unlocked
+
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  SELECT content_id, name |
+|  FROM Directories        |
+|  WHERE pc_id = 1         |
+----------------------------
+
+// returns table of files accessable from pc 1
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  SELECT content          |
+|  FROM Directories        |
+|  WHERE id = <id>         |
+----------------------------
+
+or
+
+------------------------------
+|  SQL:                      |
+|                            |
+|  SELECT content            |
+|  FROM Directories          |
+|  WHERE id = (              |
+|    SELECT content_id, name |
+|    FROM Directories        |
+|    WHERE pc_id = 1         |
+|  )                         |
+------------------------------
+
+// look at the files
+// a hint will be hidden in (one of) the files
+
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  UPDATE Firewall         |
+|  SET status = 'inactive' |
+|  WHERE level = 1         |
+----------------------------
+
+// prompt: Enter password
+// at this moment you should know it
+
+
+ACCESS PERMITTED
+Firewall level 1 deactivated
+
+
+
+
+
+*********************************************************************************************
+SECTION #2
+*********************************************************************************************
