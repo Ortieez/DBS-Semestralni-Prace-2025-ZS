@@ -1,0 +1,37 @@
+TUL: Botnet Crisis
+
+HINTS:
+************************************************************
+
+SQL SELECT
+
+Used to retrieve specific data from a table
+
+Syntax:
+
+SELECT [column_name], [column_name], ...
+FROM <table_name>
+[WHERE <condition>]
+------------------------------------------------------------
+
+SQL UPDATE
+
+Used to change a value of an attribute
+
+Syntax:
+
+UPDATE <table_name>
+SET <column_name> = <value>
+WHERE <condition>
+------------------------------------------------------------
+
+SQL INSERT
+
+Used to add a row to a table
+
+Syntax:
+
+INSERT INTO <table_name> [column_name, column_name, ...]
+VALUES (value_column1, value_column2, ...)
+------------------------------------------------------------
+
