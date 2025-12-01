@@ -75,7 +75,7 @@ You take one last look outside and then you fire up a terminal. Laser focused.
 
 
 *********************************************************************************************
-SECTION #1
+SECTION #1                                                                    Getting started
 *********************************************************************************************
 
 // a terminal opens up, saying CONNECT TO
@@ -186,7 +186,7 @@ or
 |  SELECT content            |
 |  FROM Directories          |
 |  WHERE id = (              |
-|    SELECT content_id, name |
+|    SELECT content_id       |
 |    FROM Directories        |
 |    WHERE pc_id = 1         |
 |  )                         |
@@ -205,7 +205,7 @@ or
 ----------------------------
 
 // prompt: Enter password
-// at this moment you should know it
+// at this moment the player should know it
 
 
 ACCESS PERMITTED
@@ -216,5 +216,39 @@ Firewall level 1 deactivated
 
 
 *********************************************************************************************
-SECTION #2
+SECTION #2                                                          Breaking into the network
 *********************************************************************************************
+
+---------------------------------------------------------------------------------------------
+Email from IT expert
+
+
+FROM:    itexpert@tul.cz
+SUBJECT: next step
+
+Wow, good job. In the meantime, I was trying to break into one of the routers. No success
+yet. Maybe you will be luckier. If you can pull this of, we will gain access to the logs.
+Might be useful.
+
+Also it looks like the firewall is multi-level. I'm affraid, we'll have to deactivate
+all of the layers...
+---------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+*********************************************************************************************
+SECTION #3                                                             Which PC is the source
+*********************************************************************************************
+
+
+
+
+*********************************************************************************************
+SECTION #4                                                    Which file is the botnet script
+*********************************************************************************************
+
