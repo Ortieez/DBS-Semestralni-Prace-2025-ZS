@@ -3,6 +3,9 @@ TUL: Botnet Crisis
 HINTS:
 ************************************************************
 
+SECTION INDEPENDENT
+************************************************************
+
 SQL SELECT
 
 Used to retrieve specific data from a table
@@ -34,4 +37,33 @@ Syntax:
 INSERT INTO <table_name> [column_name, column_name, ...]
 VALUES (value_column1, value_column2, ...)
 ------------------------------------------------------------
+
+
+SECTION #1
+************************************************************
+
+GETTING ACCESS TO PC1   1/2
+
+First you have to find the corresponding password. Look in
+the "Users" table (SELECT command).
+------------------------------------------------------------
+
+GETTING ACCESS TO PC1   1/2
+
+To access a PC, insert the PC's ID and username to the "Has
+access to" table. You will be prompted for password.
+------------------------------------------------------------
+
+WHAT TO DO ON A PC
+
+You can browse the directories and files on a PC you have
+access to. They are stored in the "Directories" table. Each
+file can have a content available in the "Contents" table
+under the file's id. Files can contain hints for your next
+steps.
+------------------------------------------------------------
+
+
+SECTION #2
+************************************************************
 
