@@ -234,7 +234,112 @@ Also it looks like the firewall is multi-level. I'm affraid, we'll have to deact
 all of the layers...
 ---------------------------------------------------------------------------------------------
 
+// try to connect to other computers
 
+// look through various files
+
+---------------------------------------------------------------------------------------------
+FILE NAME: HASHING
+
+CONTENT:
+
+The new hashing key for level 1 staff is set to the number of PCs in the network.
+---------------------------------------------------------------------------------------------
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  SELECT COUNT(*)         |
+|  FROM PCs                |
+----------------------------
+
+// returns number of PCs in the network -> hashing key
+
+----------------------------------------------------------------
+|  SQL:                                                        |
+|                                                              |
+|  UPDATE Users                                                |
+|  SET password = AES_DECRYPT(password, PASSWORD(<hashing key> |
+|  WHERE level = 1                                             |
+----------------------------------------------------------------
+
+// dehashes passwords for all level 1 staff
+// if WHERE level = 1 is missing, the player should get an error message
+
+// now the player gains access to level 1 PCs
+
+// look through the available files
+
+---------------------------------------------------------------------------------------------
+FILE NAME: NEW TABLE
+
+CONTENT:
+
+There is a table called All_IPs.
+contents:   device_id   ip
+---------------------------------------------------------------------------------------------
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  SELECT ip               |
+|  FROM All_IPs            |
+|                          |
+|  EXCEPT                  |
+|                          |
+|  SELECT ip               |
+|  FROM PCs                |
+----------------------------
+
+// returns ips of devices, that aren't computers (-> routers)
+
+
+---------------------------------------------------------------------------------------------
+FILE NAME: NEW ROUTER PASSWORD
+
+CONTENT:
+
+Router password was set to the sum of clearence level of all staff whose name starts with
+the letter "F"
+---------------------------------------------------------------------------------------------
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  SELECT SUM(level)       |
+|  FROM Users              |
+|  WHERE name LIKE "F*"    |
+----------------------------
+
+// returns sum of levels for users whose name starts with "F" -> router password
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  UPDATE Routers          |
+|  SET status = 'unlocked' |
+|  WHERE ip = <router1_ip> |
+----------------------------
+
+// prompt: Enter password
+// the password which the player found will unlock only one of the routers
+
+ACCESS TO <ip> PERMITTED
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  UPDATE Firewall         |
+|  SET status = 'inactive' |
+|  WHERE level = 2         |
+----------------------------
+
+// prompt: Enter password
+// at this moment the player should know it
+
+
+ACCESS PERMITTED
+Firewall level 2 deactivated
 
 
 
@@ -245,6 +350,33 @@ all of the layers...
 SECTION #3                                                             Which PC is the source
 *********************************************************************************************
 
+---------------------------------------------------------------------------------------------
+Email from IT expert
+
+
+FROM:    itexpert@tul.cz
+SUBJECT: next step
+
+You're doing great! Now we have access to the network logs. Those could help with spotting
+a suspiciously behaving device. That might be our beloved Botnet-spreading friend...
+
+Let's go, you've got this!
+---------------------------------------------------------------------------------------------
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  UPDATE Firewall         |
+|  SET status = 'inactive' |
+|  WHERE level = 3         |
+----------------------------
+
+// prompt: Enter password
+// at this moment the player should know it
+
+
+ACCESS PERMITTED
+Firewall level 3 deactivated
 
 
 
@@ -252,3 +384,17 @@ SECTION #3                                                             Which PC 
 SECTION #4                                                    Which file is the botnet script
 *********************************************************************************************
 
+----------------------------
+|  SQL:                    |
+|                          |
+|  UPDATE Firewall         |
+|  SET status = 'inactive' |
+|  WHERE level = 4         |
+----------------------------
+
+// prompt: Enter password
+// at this moment the player should know it
+
+
+ACCESS PERMITTED
+Firewall level 4 deactivated
