@@ -369,6 +369,7 @@ Let's go, you've got this!
 |                          |
 |  SELECT log_id, log_msg  |
 |  FROM Logs               |
+|  WHERE id_router = 1     |
 |  ORDER BY timestamp DESC |
 ----------------------------
 
@@ -396,6 +397,7 @@ The password for router on <ip_router2> now resets to current time when reset is
 |  SELECT timestamp, log_msg                 |
 |  FROM Logs                                 |
 |  WHERE log_msg LIKE '%Password for router% |
+|  AND id_router = 1                         |
 |  ORDER BY timestamp                        |
 ----------------------------------------------
 
@@ -488,6 +490,21 @@ Firewall level 3 deactivated
 SECTION #4                                                    Which file is the botnet script
 *********************************************************************************************
 
+---------------------------------------------------------------------------------------------
+Email from IT expert
+
+
+FROM:    itexpert@tul.cz
+SUBJECT: next step
+
+Yes! You found it!
+
+Woah... There is a load of files on the PC. One of them has to be the Botnet script. We've
+got work to do. Be careful, though. Deleting any other file could result in us being sued...
+---------------------------------------------------------------------------------------------
+
+
+
 ----------------------------
 |  SQL:                    |
 |                          |
@@ -502,5 +519,6 @@ SECTION #4                                                    Which file is the 
 
 ACCESS PERMITTED
 Firewall level 4 deactivated
+
 
 
