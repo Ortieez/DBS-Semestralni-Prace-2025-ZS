@@ -1,87 +1,124 @@
-import './App.css'
-import SqlJsPage from "./components/SQLDatabase.tsx"
-
-import 'winbox/dist/css/winbox.min.css'
-import WinBox from 'react-winbox'
-import {useEffect, useState} from "react"
+import {useEffect, useState} from "react";
 import initSqlJs, {type Database} from "sql.js";
+import WinBox from "react-winbox";
+import {Slide, ToastContainer} from "react-toastify";
+import "winbox/dist/css/winbox.min.css";
+import "./App.css";
+import SqlJsPage from "./components/SQLDatabase.tsx";
+import Menu from "./components/Menu.tsx";
+import {state, type State} from "./utils/state.ts";
+import {load, save} from "./utils/progress.ts";
+import {useInterval} from "./components/hooks/useInterval.tsx";
+import {LockScreen} from "./components/LockScreen.tsx";
+import {DesktopIcon} from "./components/DesktopIcon.tsx";
 
-const DB_STRING = "sqliteDb";
 
 function App() {
-
-    const [notifCount, setNotifCount] = useState(0)
+    const [isLocked, setIsLocked] = useState(true);
+    const [notifCount, _setNotifCount] = useState(0); // use later
+    const [progress, setProgress] = useState<State>(state);
     const [showApp, setShowApp] = useState({
         mail: false,
         terminal: false,
-        menu: false
-    })
-    const [loading, setLoading] = useState(false)
-    const [db, setDb] = useState<Database | null>(null)
+        menu: false,
+    });
+    const [loading, setLoading] = useState(false);
+    const [loadingWebsite, setLoadingWebsite] = useState(true);
+    const [db, setDb] = useState<Database | null>(null);
     const [sql, setSQL] = useState(null);
 
+    useInterval(() => {
+        if (progress.username) {
+            save(db, progress);
+        }
+    }, 5 * 60 * 1000); // needs milliseconds 5 minutes = 5 * 60 * 1000
 
     useEffect(() => {
         initSqlJs({
             locateFile: (file) => `https://sql.js.org/dist/${file}`,
         })
             .then((SQL) => {
-                setDb(new SQL.Database());
-                // @ts-ignore
-                setSQL(SQL);
+                const loadedData = load(SQL);
+                setLoadingWebsite(false);
+
+                setDb(loadedData.db || new SQL.Database());
+
+                if (loadedData.state) setProgress(loadedData.state);
+
+                setSQL(SQL as any);
             })
-            .catch((err) => console.error(err))
-    }, [])
+            .catch((err) => console.error(err));
+    }, []);
 
-    const openApp = (who: string) => {
-        if (loading) return
+    useEffect(() => {
+        if (!isLocked) save(db, progress);
+    }, [isLocked]);
 
-        setLoading(true)
-        document.body.style.cursor = "wait"
+    const openApp = (appName: keyof typeof showApp) => {
+        if (loading) return;
+
+        setLoading(true);
+        document.body.style.cursor = "wait";
 
         setTimeout(() => {
-            switch(who) {
-                case "mail":
-                    setShowApp({ ...showApp, mail: true });
-                    break;
-                case "terminal":
-                    setShowApp({ ...showApp, terminal: true });
-                    break;
-                case "menu":
-                    setShowApp({ ...showApp, menu: true });
-                    break;
-            }
-            setLoading(false)
-            document.body.style.cursor = "default"
-        }, 800)
-    }
+            setShowApp((prev) => ({...prev, [appName]: true}));
+            setLoading(false);
+            document.body.style.cursor = "default";
+        }, 800);
+    };
 
-    const saveDatabase = (db: Database | null) => {
-        if (!db) return;
+    const closeApp = (appName: keyof typeof showApp) => {
+        setShowApp((prev) => ({...prev, [appName]: false}));
+    };
 
-        const dbUintArray = db.export();
-        const dbBase64 = btoa(
-            dbUintArray.reduce((data, byte) => data + String.fromCharCode(byte), '')
+    const handleUnlock = (user: string) => {
+        // @ts-ignore - progress.username can be null and can be also string, it is accounted for in the code.
+        setProgress({...progress, username: user});
+        setIsLocked(false);
+    };
+
+    if (loadingWebsite) return <div className="text-center">Loading...</div>;
+
+    if (isLocked) {
+        return (
+            <>
+                <ToastContainer
+                    position="bottom-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop
+                    closeOnClick={false}
+                    rtl={false}
+                    pauseOnFocusLoss={false}
+                    draggable={false}
+                    pauseOnHover={false}
+                    theme="dark"
+                    transition={Slide}
+                    style={{zIndex: 9999}}
+                />
+                <LockScreen onUnlock={handleUnlock} savedUsername={progress.username}/>
+            </>
         );
-        localStorage.setItem(DB_STRING, dbBase64);
-    };
-
-    const loadDatabase = (SQL: any): Database | null => {
-        const dbBase64 = localStorage.getItem('sqliteDb');
-        if (!dbBase64) return null;
-
-        const binaryString = atob(dbBase64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-
-        return new SQL.Database(bytes);
-    };
+    }
 
     return (
         <div className="overflow-hidden">
+            <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick={false}
+                rtl={false}
+                pauseOnFocusLoss={false}
+                draggable={false}
+                pauseOnHover={false}
+                theme="dark"
+                transition={Slide}
+                style={{zIndex: 9999}}
+            />
 
+            {/* SQL Terminal Window */}
             {showApp.terminal && (
                 <WinBox
                     width={600}
@@ -90,18 +127,15 @@ function App() {
                     y={30}
                     noFull={true}
                     title="💻 SQL Terminal"
-                    top={0}
-                    right={0}
-                    bottom={0}
-                    left={0}
                     border={4}
-                    background={"#808080"}
-                    onclose={() => setShowApp({ ...showApp, terminal: false})}
+                    background="#808080"
+                    onclose={() => closeApp("terminal")}
                 >
                     <SqlJsPage loadedDb={db}/>
                 </WinBox>
             )}
 
+            {/* Mail Window */}
             {showApp.mail && (
                 <WinBox
                     width={500}
@@ -109,8 +143,8 @@ function App() {
                     x={50}
                     y={80}
                     title="📨 TULBird Mail"
-                    onclose={() => setShowApp({ ...showApp, mail: false})}
-                    background={"#6AA8FF"}
+                    background="#6AA8FF"
+                    onclose={() => closeApp("mail")}
                 >
                     <div className="p-4 text-black">
                         <h1 className="text-xl mb-3">Your Inbox</h1>
@@ -119,94 +153,44 @@ function App() {
                 </WinBox>
             )}
 
+            {/* Menu Window */}
             {showApp.menu && (
                 <WinBox
                     width={350}
-                    height={200}
+                    height={300}
                     x={50}
                     y={80}
                     title="⚙️ Menu"
-                    noResize={true}
                     noFull={true}
                     noMax={true}
-                    onclose={() => setShowApp({ ...showApp, menu: false})}
-                    background={"#0F0F0F"}
+                    background="#0F0F0F"
+                    onclose={() => closeApp("menu")}
                 >
-                    <div className="p-4 text-black flex flex-col gap-4">
-                        <button onClick={() => saveDatabase(db)} className={"p-4 bg-black text-white rounded-md hover:bg-gray-500 transition-all cursor-pointer"}>Save progress</button>
-                        <button onClick={() => {
-                            const db = loadDatabase(sql);
-                            setDb(db);
-                        }}  className={"p-4 bg-black text-white rounded-md hover:bg-gray-500 transition-all cursor-pointer"}>Load progress</button>
-                    </div>
+                    <Menu db={db} sql={sql} setDb={setDb} state={progress} setState={setProgress}/>
                 </WinBox>
             )}
 
-            <div
-                id="apps"
-                className="absolute top-0 left-0 m-4 flex flex-row gap-8 z-10"
-            >
-                <div className="relative w-24 h-24 hover:bg-gray-600 rounded-md cursor-pointer
-                    flex flex-col items-center justify-center select-none"
-                     onDoubleClick={() => openApp("terminal")}
-                >
-                    <img src="./terminal.png" className="w-10 h-10" alt=""/>
-                    <span className="text-white mt-1">SQL Terminal</span>
-                </div>
-
-                <div
-                    onDoubleClick={() => openApp("mail")}
-                    className="relative w-24 h-24 hover:bg-gray-600 rounded-md cursor-pointer
-                    flex flex-col items-center justify-center select-none"
-                >
-                    {notifCount > 0 && (
-                        <span className="
-                           absolute -top-0.5 -right-0.5 bg-red-500 text-white
-                           text-xs w-5 h-5 rounded-full flex items-center justify-center
-                           border border-black
-                       ">
-                           {notifCount}
-                       </span>
-                    )}
-
-                    <img src="./fm_logo.png" className="w-10 h-10" alt=""/>
-                    <span className="text-white mt-1">TULBird</span>
-                </div>
-
-                <div
-                    onDoubleClick={() => openApp("menu")}
-                    className="relative w-24 h-24 hover:bg-gray-600 rounded-md cursor-pointer
-                    flex flex-col items-center justify-center select-none"
-                >
-                    {notifCount > 0 && (
-                        <span className="
-                           absolute -top-0.5 -right-0.5 bg-red-500 text-white
-                           text-xs w-5 h-5 rounded-full flex items-center justify-center
-                           border border-black
-                       ">
-                           {notifCount}
-                       </span>
-                    )}
-
-                    <img src="./gear.png" className="w-10 h-10" alt=""/>
-                    <span className="text-white mt-1">Menu</span>
-                </div>
+            {/* Desktop Icons */}
+            <div id="apps" className="absolute top-0 left-0 m-4 flex flex-row gap-8 z-10">
+                <DesktopIcon
+                    icon="./terminal.png"
+                    label="SQL Terminal"
+                    onClick={() => openApp("terminal")}
+                />
+                <DesktopIcon
+                    icon="./fm_logo.png"
+                    label="TULBird"
+                    onClick={() => openApp("mail")}
+                    notifCount={notifCount}
+                />
+                <DesktopIcon
+                    icon="./gear.png"
+                    label="Menu"
+                    onClick={() => openApp("menu")}
+                />
             </div>
-
-            <button
-                onClick={() => setNotifCount(n => n + 1)}
-                className="absolute bottom-4 left-4 bg-blue-600 text-white px-4 py-2 rounded z-20"
-            >
-                Add Notification
-            </button>
-
-            <img
-                src="./tul_hack.png"
-                className="absolute inset-0 w-full h-full object-cover -z-10"
-                alt=""
-            />
         </div>
-    )
+    );
 }
 
-export default App
+export default App;

@@ -14,6 +14,7 @@
     "@types/sql.js": "^1.4.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-toastify": "^11.0.5",
     "react-winbox": "^1.5.0",
     "sql.js": "^1.13.0",
     "tailwindcss": "^4.1.17"

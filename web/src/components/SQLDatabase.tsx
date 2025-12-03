@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react"
-import { type Database } from "sql.js"
+import {useState, useEffect, useRef} from "react"
+import {type Database} from "sql.js"
 
 interface HistoryEntry {
     input: string
@@ -81,7 +81,7 @@ export default function SqlJsPage(props: { loadedDb: Database | null }) {
         if (['FROM', 'JOIN', 'INTO', 'UPDATE', 'TABLE'].includes(prevWord)) {
             tables.forEach(table => {
                 if (table.toUpperCase().startsWith(lastWord)) {
-                    suggestions.push({ text: table, type: 'table' })
+                    suggestions.push({text: table, type: 'table'})
                 }
             })
         }
@@ -104,7 +104,7 @@ export default function SqlJsPage(props: { loadedDb: Database | null }) {
         // Always suggest keywords
         SQL_KEYWORDS.forEach(keyword => {
             if (keyword.startsWith(lastWord) && !suggestions.find(s => s.text === keyword)) {
-                suggestions.push({ text: keyword, type: 'keyword' })
+                suggestions.push({text: keyword, type: 'keyword'})
             }
         })
 
@@ -191,7 +191,7 @@ export default function SqlJsPage(props: { loadedDb: Database | null }) {
         updateSuggestions(e.currentTarget.value)
     }
 
-    const ResultTable = ({ columns, values }: ResultTableProps) => (
+    const ResultTable = ({columns, values}: ResultTableProps) => (
         <table className="border-collapse mt-1">
             <thead>
             <tr>
