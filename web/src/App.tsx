@@ -7,10 +7,12 @@ import "./App.css";
 import SqlJsPage from "./components/SQLDatabase.tsx";
 import Menu from "./components/Menu.tsx";
 import {state, type State} from "./utils/state.ts";
-import {load, save} from "./utils/progress.ts";
+import {load, save, saveNotepad} from "./utils/progress.ts";
 import {useInterval} from "./components/hooks/useInterval.tsx";
 import {LockScreen} from "./components/LockScreen.tsx";
 import {DesktopIcon} from "./components/DesktopIcon.tsx";
+import Notepad from "./components/Notepad.tsx";
+import {NOTEPAD_DATA} from "./utils/const.ts";
 
 
 function App() {
@@ -21,17 +23,25 @@ function App() {
         mail: false,
         terminal: false,
         menu: false,
+        notepad: false,
     });
     const [loading, setLoading] = useState(false);
     const [loadingWebsite, setLoadingWebsite] = useState(true);
     const [db, setDb] = useState<Database | null>(null);
     const [sql, setSQL] = useState(null);
+    const [notepad, setNotepad] = useState(() => {
+        return localStorage.getItem(NOTEPAD_DATA) || "";
+    });
 
     useInterval(() => {
         if (progress.username) {
-            save(db, progress);
+            save(db, progress, notepad);
         }
     }, 5 * 60 * 1000); // needs milliseconds 5 minutes = 5 * 60 * 1000
+
+    useEffect(() => {
+        saveNotepad(notepad);
+    }, [notepad]);
 
     useEffect(() => {
         initSqlJs({
@@ -45,13 +55,15 @@ function App() {
 
                 if (loadedData.state) setProgress(loadedData.state);
 
+                if (loadedData.notepad) setNotepad(loadedData.notepad);
+
                 setSQL(SQL as any);
             })
             .catch((err) => console.error(err));
     }, []);
 
     useEffect(() => {
-        if (!isLocked) save(db, progress);
+        if (!isLocked) save(db, progress, notepad);
     }, [isLocked]);
 
     const openApp = (appName: keyof typeof showApp) => {
@@ -170,6 +182,22 @@ function App() {
                 </WinBox>
             )}
 
+            {showApp.notepad && (
+                <WinBox
+                    width={600}
+                    height={400}
+                    x={50}
+                    y={80}
+                    title="📝 Notepad"
+                    noFull={true}
+                    noMax={true}
+                    background="#357EC7"
+                    onclose={() => closeApp("notepad")}
+                >
+                    <Notepad savedNotes={notepad} setNotepad={setNotepad}/>
+                </WinBox>
+            )}
+
             {/* Desktop Icons */}
             <div id="apps" className="absolute top-0 left-0 m-4 flex flex-row gap-8 z-10">
                 <DesktopIcon
@@ -187,6 +215,11 @@ function App() {
                     icon="./gear.png"
                     label="Menu"
                     onClick={() => openApp("menu")}
+                />
+                <DesktopIcon
+                    icon="./notepad.png"
+                    label="Notepad"
+                    onClick={() => openApp("notepad")}
                 />
             </div>
         </div>

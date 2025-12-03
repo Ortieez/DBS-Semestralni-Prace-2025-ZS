@@ -1,6 +1,6 @@
 import type {Database} from "sql.js";
 import {toast} from "react-toastify";
-import {DB_LAST_SAVED, DB_STRING, STATE_PROGRESS} from "./const.ts";
+import {DB_LAST_SAVED, DB_STRING, NOTEPAD_DATA, STATE_PROGRESS} from "./const.ts";
 import {type State} from "./state.ts";
 
 const saveDatabase = (db: Database | null) => {
@@ -41,10 +41,20 @@ const loadProgress = (): State | null => {
     return JSON.parse(stringedJson);
 }
 
-export const save = (db: Database | null, state: State) => {
+export const saveNotepad = (data: string) => {
+    localStorage.setItem(NOTEPAD_DATA, data);
+    toast.success("Successfully saved your notepad!");
+}
+
+const loadNotepad = () => {
+    return localStorage.getItem(NOTEPAD_DATA);
+}
+
+export const save = (db: Database | null, state: State, notepadString: string) => {
     try {
         saveDatabase(db);
         saveProgress(state);
+        saveNotepad(notepadString);
         localStorage.setItem(DB_LAST_SAVED, new Date().toISOString());
         toast.success("Successfully saved your progress!");
     } catch (e) {
@@ -57,11 +67,12 @@ export const load = (sql: any) => {
     try {
         const db = loadDatabase(sql);
         const state = loadProgress();
-        return {db, state};
+        const notepadString = loadNotepad();
+        return {db, state, notepad: notepadString || ""};
     } catch (e) {
         toast.error("Failed to load your progress!");
         console.error(e);
-        return {db: null, state: null};
+        return {db: null, state: null, notepad: ""};
     }
 }
 
@@ -73,4 +84,5 @@ export const clearProgress = () => {
     localStorage.removeItem(DB_STRING);
     localStorage.removeItem(DB_LAST_SAVED);
     localStorage.removeItem(STATE_PROGRESS);
+    localStorage.removeItem(NOTEPAD_DATA);
 }
