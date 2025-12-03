@@ -322,7 +322,7 @@ the letter "F"
 ----------------------------
 
 // prompt: Enter password
-// the password which the player found will unlock only one of the routers
+// the password that the player found will unlock only one of the routers
 
 ACCESS TO <ip> PERMITTED
 
@@ -438,6 +438,34 @@ The password for router on <ip_router2> now resets to current time when reset is
 // returns the number of 
 
 
+// the source PC is the one that is in the top 3 in these categories:
+//    1. most logs outside network
+//    2. most logs between 2:00 and 4:00 AM
+
+-----------------------------------------------------------------
+|  SQL:                                                         |
+|                                                               |
+|  SELECT source_ip                                             |
+|  FROM Logs                                                    |
+|  WHERE destination_ip NOT IN (                                |
+|    SELECT ip FROM All_IPs                                     |
+|  )                                                            |
+|  GROUP BY source_ip                                           |
+|  ORDER BY COUNT(DISTINCT destination_ip) DESC                 |
+|  LIMIT 3                                                      |
+|                                                               |
+|  INTERSECT                                                    |
+|                                                               |
+|  SELECT source_ip,                                            |
+|  FROM Logs                                                    |
+|  WHERE strftime('%H', timestamp_column) BETWEEN '02' AND '04' |
+|  GROUP BY source_ip                                           |
+|  ORDER BY COUNT(*) DESC                                       |
+|  LIMIT 3                                                      |
+-----------------------------------------------------------------
+
+// returns the IP of the source PC
+
 
 ----------------------------
 |  SQL:                    |
@@ -474,4 +502,5 @@ SECTION #4                                                    Which file is the 
 
 ACCESS PERMITTED
 Firewall level 4 deactivated
+
 
