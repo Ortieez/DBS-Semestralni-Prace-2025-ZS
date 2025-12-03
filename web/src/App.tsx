@@ -178,7 +178,15 @@ function App() {
                     background="#0F0F0F"
                     onclose={() => closeApp("menu")}
                 >
-                    <Menu db={db} sql={sql} setDb={setDb} state={progress} setState={setProgress}/>
+                    <Menu
+                        db={db}
+                        sql={sql}
+                        setDb={setDb}
+                        state={progress}
+                        setState={setProgress}
+                        notepad={notepad}
+                        setNotepad={setNotepad}
+                    />
                 </WinBox>
             )}
 

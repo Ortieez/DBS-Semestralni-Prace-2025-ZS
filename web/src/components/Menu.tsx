@@ -9,9 +9,12 @@ export type MenuProps = {
     db: Database | null,
     sql: any,
     state: State,
+    notepad: string,
 
     setDb: React.Dispatch<React.SetStateAction<Database | null>>,
-    setState: React.Dispatch<React.SetStateAction<State>>
+    setState: React.Dispatch<React.SetStateAction<State>>,
+    setNotepad: React.Dispatch<React.SetStateAction<string>>
+
 }
 
 const Menu = (props: MenuProps) => {
@@ -20,7 +23,7 @@ const Menu = (props: MenuProps) => {
     return (
         <div className="p-4 text-black flex flex-col gap-4 h-full">
             <button onClick={() => {
-                save(props.db, props.state);
+                save(props.db, props.state, props.notepad);
                 setLastSaved(getLastSavedTimeString(localStorage.getItem(DB_LAST_SAVED)));
             }}
                     className={"p-4 bg-black text-white rounded-md h-[50%] hover:bg-gray-500 transition-all cursor-pointer"}>Save
@@ -29,6 +32,7 @@ const Menu = (props: MenuProps) => {
                 let data = load(props.sql);
                 if (data.db) props.setDb(data.db);
                 if (data.state) props.setState(data.state);
+                if (data.notepad) props.setNotepad(data.notepad);
 
                 if (data.db || data.state) {
                     toast.success("Successfully loaded your progress!");
