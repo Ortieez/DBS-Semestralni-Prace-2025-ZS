@@ -67,3 +67,33 @@ steps.
 SECTION #2
 ************************************************************
 
+BREAKING INTO ROUTER1 1/4
+
+Maybe you can find some clues in the files on other PCs
+------------------------------------------------------------
+
+BREAKING INTO ROUTER1 2/4
+
+You will need to get access to level 1 computers
+------------------------------------------------------------
+
+BREAKING INTO ROUTER1 3/4
+
+You will need to find both the IP address and password of the
+router to access it
+------------------------------------------------------------
+
+BREAKING INTO ROUTER1 4/4
+
+You know the IPs of all the devices in the network and also
+the IPs of all computers...
+
+
+SECTION #3
+************************************************************
+
+
+SECTION #4
+************************************************************
+
+
