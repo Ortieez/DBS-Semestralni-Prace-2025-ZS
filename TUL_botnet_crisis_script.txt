@@ -363,6 +363,82 @@ a suspiciously behaving device. That might be our beloved Botnet-spreading frien
 Let's go, you've got this!
 ---------------------------------------------------------------------------------------------
 
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  SELECT log_id, log_msg  |
+|  FROM Logs               |
+|  ORDER BY timestamp DESC |
+----------------------------
+
+// prints log messages from the most recent
+
+---------------------------------------------------------------------------------------------
+LOG:
+
+Password for router at <ip_router2> was reset
+---------------------------------------------------------------------------------------------
+
+// look through available files
+
+---------------------------------------------------------------------------------------------
+FILE NAME: New Password Management for <ip_router2>
+
+CONTENT:
+
+The password for router on <ip_router2> now resets to current time when reset is initialized
+---------------------------------------------------------------------------------------------
+
+----------------------------------------------
+|  SQL:                                      |
+|                                            |
+|  SELECT timestamp, log_msg                 |
+|  FROM Logs                                 |
+|  WHERE log_msg LIKE '%Password for router% |
+|  ORDER BY timestamp                        |
+----------------------------------------------
+
+// Find out the last time the password for router 2 was reset
+
+
+----------------------------
+|  SQL:                    |
+|                          |
+|  UPDATE Routers          |
+|  SET status = 'unlocked' |
+|  WHERE ip = <ip_router2> |
+----------------------------
+
+// prompt: Enter password
+// Enter the timestamp of the log
+
+
+-------------------------------------------
+|  SQL:                                   |
+|                                         |
+|  SELECT source_ip, COUNT(*) AS num_logs |
+|  FROM Logs                              |
+|  GROUP BY source_ip                     |
+|  ORDER BY num_logs DESC                 |
+-------------------------------------------
+
+// returns the number of logs sent from each IP
+
+
+-----------------------------------------------------------------
+|  SQL:                                                         |
+|                                                               |
+|  SELECT source_ip, COUNT(DISTINCT destination_ip) AS num_dest |
+|  FROM Logs                                                    |
+|  GROUP BY source_ip                                           |
+|  ORDER BY num_dest DESC                                       |
+-----------------------------------------------------------------
+
+// returns the number of 
+
+
+
 ----------------------------
 |  SQL:                    |
 |                          |
@@ -398,3 +474,4 @@ SECTION #4                                                    Which file is the 
 
 ACCESS PERMITTED
 Firewall level 4 deactivated
+
