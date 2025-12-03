@@ -84,7 +84,7 @@ export function LockScreen({onUnlock, savedUsername}: {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        toast.warning("Switching users will erase all progress made so far. And create a new session for a new user. Are you sure you want to continue?", {delay: 10000});
+                                        toast.warning("Switching users will erase all progress made so far. And create a new session for a new user. Are you sure you want to continue?", {autoClose: 10000});
                                         setShowDecision(true);
                                     }}
                                     disabled={!username.trim()}
