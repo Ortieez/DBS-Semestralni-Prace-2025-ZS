@@ -13,7 +13,7 @@ import {LockScreen} from "./components/LockScreen.tsx";
 import {DesktopIcon} from "./components/DesktopIcon.tsx";
 import Notepad from "./components/Notepad.tsx";
 import {NOTEPAD_DATA} from "./utils/const.ts";
-
+import {CREATE_SQL_TEMPLATE} from "./utils/templateDB/create.ts";
 
 function App() {
     const [isLocked, setIsLocked] = useState(true);
@@ -51,7 +51,13 @@ function App() {
                 const loadedData = load(SQL);
                 setLoadingWebsite(false);
 
-                setDb(loadedData.db || new SQL.Database());
+                if (loadedData.db) {
+                    setDb(loadedData.db);
+                } else {
+                    let tempDB = new SQL.Database();
+                    tempDB!.exec(CREATE_SQL_TEMPLATE);
+                    setDb(tempDB);
+                }
 
                 if (loadedData.state) setProgress(loadedData.state);
 
