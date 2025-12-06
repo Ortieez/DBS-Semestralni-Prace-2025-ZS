@@ -2,7 +2,7 @@ T U L :   B O T N E T   C R I S I S
 --------------------------------------------------------------------------------------------
 
 ***DISCLAIMER***
-Actual TUL emplyees are far more competent, than the characters in this game.
+Actual TUL employees are far more competent than the characters in this game.
 
 
 
@@ -12,12 +12,12 @@ INTRO:
 
 
 
-Saturday evening. You're sitting in your cozy bedroom, enjoying a well deserved rest time.
+Saturday evening. You're sitting in your cozy bedroom, enjoying a well-deserved rest time.
 The rain softly drizzles outside and harmonises with your favorite relaxing music. The
 scent of a freshly brewed tea fills the air.
 …
 
-Suddenly a notification interrupts your thoughts…
+Suddenly, a notification interrupts your thoughts…
 
 --------------------------------------------------------------------------------------------
 Email from rector:
@@ -32,12 +32,12 @@ He will do his best to help you.
 
 Help me <username>, you're my only hope...
 
-Desperatly,
+Desperately,
 
 Rector
 ---------------------------------------------------------------------------------------------
 
-This really wasn't your plan for saturday evening, but as the rector said: You're their only
+This really wasn't your plan for Saturday evening, but as the rector said: You're their only
 hope...
 
 *sigh* "Looks like I have no choice…"
@@ -53,9 +53,9 @@ SUBJECT: botnet
 
 Hello <username>,
 
-I don't like to admit it, but I'm lost. Hope you can help me. The attack is comming from
-this IP address: ? 174.156.12.4 ? We have to figure out, which device is the source and
-delete the botnet script. They have a nasty firewall however. We need to dispose it first.
+I don't like to admit it, but I'm lost. Hope you can help me. The attack is coming from
+this IP address: ? 174.156.12.4 ? We have to figure out which device is the source and
+delete the botnet script. They have a nasty firewall, however. We need to dispose it first.
 This should work:
 
 UPDATE Firewall
@@ -64,10 +64,10 @@ WHERE level = 1
 ---------------------------------------------------------------------------------------------
 
 
-"Great. So the IT expert is lost and they want ME to figure it out… Whatever, I'll do my
+"Great. So the IT expert is lost, and they want ME to figure it out… Whatever, I'll do my
 best."
 
-You take one last look outside and then you fire up a terminal. Laser focused.
+You take one last look outside, and then you fire up a terminal. Laser focused.
 
 
 
@@ -299,7 +299,7 @@ FILE NAME: NEW ROUTER PASSWORD
 
 CONTENT:
 
-Router password was set to the sum of clearence level of all staff whose name starts with
+Router password was set to the sum of the clearance levels of all staff whose name starts with
 the letter "F"
 ---------------------------------------------------------------------------------------------
 
@@ -388,7 +388,8 @@ FILE NAME: New Password Management for <ip_router2>
 
 CONTENT:
 
-The password for router on <ip_router2> now resets to current time when reset is initialized
+The password for the router on <ip_router2> now resets to the current time when reset is
+initialized
 ---------------------------------------------------------------------------------------------
 
 ----------------------------------------------
@@ -510,11 +511,138 @@ FILE NAME: Hashing Update
 
 CONTENT:
 
-??? Some clue for level 2 hashing
+Level 2 hashing updated to a combination of the first letter of our names
+(in alphabetical order)
+---------------------------------------------------------------------------------------------
+
+----------------------------------------
+|  SQL:                                |
+|                                      |
+|  SELECT substr(name, 1, 1) AS letter |
+|  FROM Users                          |
+|  WHERE permision = 2                 |
+|  ORDER BY letter                     |
+----------------------------------------
+
+
+
+// look through available files and logs
+
+---------------------------------------------------------------------------------------------
+FILE NAME: Hashing Update
+
+CONTENT:
+
+The key is changing constantly. Once in a while, it RESETS to ??? and then it UPDATES by
+incrementing the value by 1.
+---------------------------------------------------------------------------------------------
+
+-------------------------------------------
+|  SQL:                                   |
+|                                         |
+|  SELECT COUNT(log_msg)                  |
+|  FROM Logs                              |
+|  WHERE time > (                         |
+|    SELECT MAX(time)                     |
+|    FROM Logs                            |
+|    WHERE log_msg LIKE '%level 3 hash%'  |
+|    AND log_msg LIKE '%reset%'           |
+|  )                                      |
+-------------------------------------------
+
+// returns the amount by which the key was incremented since the last reset
+
+
+
+
+// the player gains access to the source PC
+
+--------------------------------------------------------------
+|  SQL:                                                      |
+|                                                            |
+|  WITH RECURSIVE DirectoryDepth AS (                        |
+|      SELECT                                                |
+|          id AS root_id,                                    |
+|          id AS current_id,                                 |
+|          0 AS depth                                        |
+|      FROM                                                  |
+|          Directories                                       |
+|      WHERE                                                 |
+|          id_parent IS NULL                                 |
+|          AND id_PC = <source_pc_ip>                        |
+|                                                            |
+|      UNION ALL                                             |
+|                                                            |
+|      SELECT                                                |
+|          dd.root_id,                                       |
+|          d.id,                                             |
+|          dd.depth + 1                                      |
+|      FROM                                                  |
+|          Directories d                                     |
+|      INNER JOIN                                            |
+|          DirectoryDepth dd ON d.id_parent = dd.current_id  |
+|  )                                                         |
+--------------------------------------------------------------
+
+// returns depth of root folders on source pc
+// the botnet script is in the deepest folder
+
+
+---------------------------------------------------------------------------------------------
+CONTENT OF BOTNET FOLDER
+
+security_log.txt
+botnet_1.exe
+botnet_2.exe
+botnet_3.exe
+botnet_4.exe
+---------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------
+FILE NAME: security_log.txt
+
+CONTENT:
+
+WARNING: The original security log has been compromised, resulting in only ONE of the reports
+being true
+
+botnet_1.exe -> Virus detected: botnet_2.exe is a virus
+botnet_2.exe -> Virus detected: botnet_4.exe is a virus
+botnet_3.exe -> Status: SAFE this (botnet_3.exe) is not a virus
+botnet_4.exe -> Malfunction detected: report from botnet_2.exe is incorrect
 ---------------------------------------------------------------------------------------------
 
 
+---------------------------------------------------------------------------------------------
+Email from IT expert
 
+
+FROM:    itexpert@tul.cz
+SUBJECT: firewall level 4
+
+The botnet corrupted the last level of the firewall. It seems like it set the password to
+the number of directories with null content on the computer (in the local network) that its
+source PC sent the last PING log...
+---------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------
+|  SQL:                                                         |
+|                                                               |
+|  SELECT COUNT(id)                                             |
+|  FROM Directories                                             |
+|  WHERE content IS NULL                                        |
+|  AND ip_pc = (                                                |
+|    SELECT destination_ip                                      |
+|    FROM Logs                                                  |
+|    WHERE source_ip = <source_pc_ip>                           |
+|    AND log_msg = 'ping'                                       |
+|    AND destination_ip IN (                                    |
+|      SELECT ip FROM All_IPs                                   |
+|    )                                                          |
+|    ORDER BY time                                              |
+|    LIMIT 1                                                    |
+|  )                                                            |
+-----------------------------------------------------------------
 
 
 ----------------------------
@@ -533,5 +661,56 @@ ACCESS PERMITTED
 Firewall level 4 deactivated
 
 
+-----------------------------
+|  SQL:                     | 
+|                           |
+|  DELETE FROM Directories  |
+|  WHERE id = <botnet_id>   |
+-----------------------------
+
+// the SQL terminal clears and only the cursor is blinking
 
 
+
+
+*********************************************************************************************
+OUTRO:
+*********************************************************************************************
+
+---------------------------------------------------------------------------------------------
+Email from IT expert
+
+
+FROM:    itexpert@tul.cz
+SUBJECT: Good job
+
+Oh yes! You did it! Well done, youngster.
+---------------------------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------------------
+Email from rector:
+
+
+FROM:    rector@tul.cz
+SUBJECT: THANK YOU
+
+Dear <username>,
+
+You saved me and the university. I owe you a huge thank you. Now, please, get some sleep.
+
+Gratefuly,
+
+Rector
+---------------------------------------------------------------------------------------------
+
+
+You lean back in your chair. Your tea is cold, and the night is pitch black. You yawn as you
+look at the clock...
+
+"I really could use some sleep..."
+
+*********************************************************************************************
+*********************************************************************************************
+
+                        <-   C R E D I T S   R O L L   ->
