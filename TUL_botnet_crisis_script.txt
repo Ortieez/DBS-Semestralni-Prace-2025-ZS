@@ -13,7 +13,7 @@ INTRO:
 
 
 Saturday evening. You're sitting in your cozy bedroom, enjoying a well deserved rest time.
-The rain softly drizzels outside and harmonises with your favorite relaxing music. The
+The rain softly drizzles outside and harmonises with your favorite relaxing music. The
 scent of a freshly brewed tea fills the air.
 …
 
@@ -499,9 +499,21 @@ SUBJECT: next step
 
 Yes! You found it!
 
-Woah... There is a load of files on the PC. One of them has to be the Botnet script. We've
+Woah... There's a load of files on the PC. One of them has to be the Botnet script. We've
 got work to do. Be careful, though. Deleting any other file could result in us being sued...
 ---------------------------------------------------------------------------------------------
+
+// the source PC is level 3 -> the player will need a level 3 user's password
+
+---------------------------------------------------------------------------------------------
+FILE NAME: Hashing Update
+
+CONTENT:
+
+??? Some clue for level 2 hashing
+---------------------------------------------------------------------------------------------
+
+
 
 
 
@@ -519,6 +531,7 @@ got work to do. Be careful, though. Deleting any other file could result in us b
 
 ACCESS PERMITTED
 Firewall level 4 deactivated
+
 
 
 
