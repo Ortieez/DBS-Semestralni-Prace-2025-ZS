@@ -112,7 +112,7 @@ You could try to access a PC with the default username "student"...
 |  SQL:                    |
 |                          |
 |  SELECT password         |
-|  FROM Users              |
+|  FROM User               |
 |  WHERE name = 'student'  |
 ----------------------------
 
@@ -149,24 +149,24 @@ Good luck, youngster!
 ---------------------------------------------------------------------------------------------
 
 
-----------------------------
-|  SQL:                    |
-|                          |
-|  INSERT INTO has_access  |
-|  VALUES (1, student)     |
-----------------------------
+-------------------------------------------------------
+|  SQL:                                               |
+|                                                     |
+|  INSERT INTO User_has_access_to_PC                  |
+|  VALUES ("192.168.100.129", student)                |
+-------------------------------------------------------
 
 // prompt: enter password (user enters 'student')
 // pc 1 unlocked
 
 
-----------------------------
-|  SQL:                    |
-|                          |
-|  SELECT content_id, name |
-|  FROM Directories        |
-|  WHERE pc_id = 1         |
-----------------------------
+-------------------------------------------
+|  SQL:                                   |
+|                                         |
+|  SELECT content_id, name                |
+|  FROM Directories                       |
+|  WHERE pc_ip = "192.168.100.129"        |
+-------------------------------------------
 
 // returns table of files accessable from pc 1
 
@@ -180,17 +180,17 @@ Good luck, youngster!
 
 or
 
-------------------------------
-|  SQL:                      |
-|                            |
-|  SELECT content            |
-|  FROM Directories          |
-|  WHERE id = (              |
-|    SELECT content_id       |
-|    FROM Directories        |
-|    WHERE pc_id = 1         |
-|  )                         |
-------------------------------
+--------------------------------------
+|  SQL:                              |
+|                                    |
+|  SELECT content                    |
+|  FROM Directories                  |
+|  WHERE id = (                      |
+|    SELECT content_id               |
+|    FROM Directories                |
+|    WHERE pc_ip = "192.168.100.129" |
+|  )                                 |
+--------------------------------------
 
 // look at the files
 // a hint will be hidden in (one of) the files
@@ -714,3 +714,4 @@ look at the clock...
 *********************************************************************************************
 
                         <-   C R E D I T S   R O L L   ->
+
