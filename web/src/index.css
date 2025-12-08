@@ -1,8 +1,1 @@
 @import "tailwindcss";
-
-html, body {
-    background: black;
-    background-image: url('/tul_hack.png');
-    background-size: cover;
-    background-repeat: no-repeat;
-}

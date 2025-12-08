@@ -12,7 +12,7 @@ export function DesktopIcon({
     return (
         <div
             onClick={onClick}
-            className="relative w-24 h-24 hover:bg-gray-600 rounded-md cursor-pointer flex flex-col items-center justify-center select-none transition-colors"
+            className="relative w-24 h-24 hover:bg-gray-600 hover:text-white text-black rounded-md cursor-pointer flex flex-col items-center justify-center select-none transition-colors"
         >
             {notifCount > 0 && (
                 <span
@@ -20,8 +20,8 @@ export function DesktopIcon({
           {notifCount}
         </span>
             )}
-            <img src={icon} className="w-10 h-10" alt=""/>
-            <span className="text-white mt-1 text-sm">{label}</span>
+            <img src={icon} className="w-10 h-10 object-contain" alt=""/>
+            <span className="mt-1 text-sm">{label}</span>
         </div>
     );
 }

@@ -35,7 +35,6 @@ export function LockScreen({onUnlock, savedUsername}: {
 
     return (
         <div className="fixed inset-0 z-50 bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-            {/* Fade to black overlay */}
             <div
                 className={`absolute inset-0 bg-black transition-opacity duration-700 ${
                     fadeOut ? "opacity-100" : "opacity-0"
@@ -43,7 +42,6 @@ export function LockScreen({onUnlock, savedUsername}: {
             />
 
             <div className="relative h-full flex flex-col items-center justify-center">
-                {/* User Avatar Circle */}
                 <div className="mb-8">
                     <div
                         className="w-32 h-32 rounded-full bg-gradient-to-br from-[#ea7603] to-[#c95f02] flex items-center justify-center text-white text-5xl font-bold shadow-2xl">
@@ -51,7 +49,6 @@ export function LockScreen({onUnlock, savedUsername}: {
                     </div>
                 </div>
 
-                {/* Login Form */}
                 {!isLoggingIn ? (
                     <form onSubmit={handleLogin} className="w-80 space-y-4">
                         <div className="text-center mb-6">
@@ -127,7 +124,6 @@ export function LockScreen({onUnlock, savedUsername}: {
                             </h2>
                         </div>
 
-                        {/* Password dots animation */}
                         <div
                             className="w-full px-4 py-3 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg border border-white border-opacity-20 min-h-[48px] flex items-center">
                             <span className="text-black text-2xl tracking-wider">{dots}</span>
@@ -139,7 +135,6 @@ export function LockScreen({onUnlock, savedUsername}: {
                     </div>
                 )}
 
-                {/* Bottom text */}
                 <div className="absolute bottom-8 text-center text-white text-opacity-60 text-sm">
                     Signing into fm.tul.cz network
                 </div>

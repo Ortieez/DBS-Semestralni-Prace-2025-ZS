@@ -11,7 +11,6 @@ function Notepad(props: { savedNotes: string, setNotepad: React.Dispatch<React.S
 
     return (
         <div className="flex flex-col h-full bg-white">
-            {/* Menu Bar */}
             <div className="bg-white border-b border-gray-200 px-2 py-1 text-sm flex gap-4">
                 <div
                     className="relative"
@@ -47,7 +46,6 @@ function Notepad(props: { savedNotes: string, setNotepad: React.Dispatch<React.S
                 <span className="hover:bg-blue-100 px-2 cursor-default">Help</span>
             </div>
 
-            {/* Text Area */}
             <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
@@ -58,7 +56,6 @@ function Notepad(props: { savedNotes: string, setNotepad: React.Dispatch<React.S
                 }}
             />
 
-            {/* Status Bar */}
             <div
                 className="bg-gray-50 border-t border-gray-200 px-3 py-1 text-xs text-gray-600 flex justify-between items-center">
                 <div className="flex gap-4">

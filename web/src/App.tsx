@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import initSqlJs, {type Database} from "sql.js";
 import WinBox from "react-winbox";
 import {Slide, ToastContainer} from "react-toastify";
@@ -6,24 +6,30 @@ import "winbox/dist/css/winbox.min.css";
 import "./App.css";
 import SqlJsPage from "./components/SQLDatabase.tsx";
 import Menu from "./components/Menu.tsx";
+import EmailClient from "./components/EmailClient.tsx";
+import AdminPanel from "./components/AdminPanel.tsx";
+import Cutscene from "./components/Cutscene.tsx";
 import {state, type State} from "./utils/state.ts";
 import {load, save, saveNotepad} from "./utils/progress.ts";
 import {useInterval} from "./components/hooks/useInterval.tsx";
+import {useStoryTriggers} from "./components/hooks/useStoryTriggers.tsx";
 import {LockScreen} from "./components/LockScreen.tsx";
 import {DesktopIcon} from "./components/DesktopIcon.tsx";
 import Notepad from "./components/Notepad.tsx";
 import {NOTEPAD_DATA} from "./utils/const.ts";
 import {CREATE_SQL_TEMPLATE} from "./utils/templateDB/create.ts";
+import {StoryManager} from "./utils/storyFlow.ts";
 
 function App() {
     const [isLocked, setIsLocked] = useState(true);
-    const [notifCount, _setNotifCount] = useState(0); // use later
     const [progress, setProgress] = useState<State>(state);
+    const [currentCutscene, setCurrentCutscene] = useState<string | null>(null);
     const [showApp, setShowApp] = useState({
         mail: false,
         terminal: false,
         menu: false,
         notepad: false,
+        admin: false,
     });
     const [loading, setLoading] = useState(false);
     const [loadingWebsite, setLoadingWebsite] = useState(true);
@@ -33,11 +39,22 @@ function App() {
         return localStorage.getItem(NOTEPAD_DATA) || "";
     });
 
+
+    const storyManagerRef = useRef<StoryManager | null>(null);
+    if (!storyManagerRef.current) {
+        storyManagerRef.current = new StoryManager(progress, progress.currentStoryEvent);
+    }
+
+    const storyTriggers = useStoryTriggers({
+        storyManager: storyManagerRef.current,
+        setProgress,
+    });
+
     useInterval(() => {
         if (progress.username && !isLocked) {
             save(db, progress, notepad);
         }
-    }, 5 * 60 * 1000); // needs milliseconds 5 minutes = 5 * 60 * 1000
+    }, 5 * 60 * 1000); // needs milliseconds, 5 minutes = 5 * 60 * 1000
 
     useEffect(() => {
         saveNotepad(notepad, true);
@@ -72,6 +89,32 @@ function App() {
         if (!isLocked) save(db, progress, notepad);
     }, [isLocked]);
 
+    useEffect(() => {
+        if (isLocked || !storyManagerRef.current) return;
+
+        storyManagerRef.current.updateState(progress);
+
+        const action = storyManagerRef.current.checkForProgress();
+
+        if (action.action === "show_cutscene" && action.id) {
+            setCurrentCutscene(action.id);
+        } else if (action.action === "show_email" && action.id) {
+            const emailId = action.id as keyof typeof progress.emails;
+            storyManagerRef.current.advance();
+            setProgress((prev) => ({
+                ...prev,
+                emails: {
+                    ...prev.emails,
+                    [emailId]: {
+                        ...prev.emails[emailId],
+                        shown: true,
+                    },
+                },
+                currentStoryEvent: storyManagerRef.current!.getCurrentEventKey(),
+            }));
+        }
+    }, [progress, isLocked]);
+
     const openApp = (appName: keyof typeof showApp) => {
         if (loading) return;
 
@@ -97,6 +140,10 @@ function App() {
 
     if (loadingWebsite) return <div className="text-center">Loading...</div>;
 
+    const unreadEmailCount = Object.entries(progress.emails).filter(
+        ([, emailData]) => emailData.shown && !emailData.read
+    ).length;
+
     if (isLocked) {
         return (
             <>
@@ -120,7 +167,50 @@ function App() {
     }
 
     return (
-        <div className="overflow-hidden">
+        <div className="fixed inset-0 overflow-hidden">
+            <img 
+                src="/background.webp" 
+                alt="Background" 
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{zIndex: -1}}
+            />
+            {currentCutscene && (
+                <Cutscene
+                    cutsceneId={currentCutscene}
+                    gameState={progress}
+                    onComplete={() => {
+                        storyManagerRef.current!.advance();
+                        setProgress((prev) => ({
+                            ...prev,
+                            cutscenes: {
+                                ...prev.cutscenes,
+                                [currentCutscene]: {
+                                    ...prev.cutscenes[currentCutscene as keyof typeof prev.cutscenes],
+                                    viewed: true,
+                                },
+                            },
+                            currentStoryEvent: storyManagerRef.current!.getCurrentEventKey(),
+                        }));
+                        setCurrentCutscene(null);
+                    }}
+                    onSkip={() => {
+                        storyManagerRef.current!.advance();
+                        setProgress((prev) => ({
+                            ...prev,
+                            cutscenes: {
+                                ...prev.cutscenes,
+                                [currentCutscene]: {
+                                    ...prev.cutscenes[currentCutscene as keyof typeof prev.cutscenes],
+                                    viewed: true,
+                                },
+                            },
+                            currentStoryEvent: storyManagerRef.current!.getCurrentEventKey(),
+                        }));
+                        setCurrentCutscene(null);
+                    }}
+                />
+            )}
+
             <ToastContainer
                 position="bottom-right"
                 autoClose={5000}
@@ -136,7 +226,6 @@ function App() {
                 style={{zIndex: 9999}}
             />
 
-            {/* SQL Terminal Window */}
             {showApp.terminal && (
                 <WinBox
                     width={600}
@@ -149,29 +238,40 @@ function App() {
                     background="#808080"
                     onclose={() => closeApp("terminal")}
                 >
-                    <SqlJsPage loadedDb={db}/>
+                    <SqlJsPage loadedDb={db} storyTriggers={storyTriggers} gameState={progress}/>
                 </WinBox>
             )}
 
-            {/* Mail Window */}
             {showApp.mail && (
                 <WinBox
-                    width={500}
-                    height={350}
+                    width={800}
+                    height={500}
                     x={50}
                     y={80}
                     title="📨 TULBird Mail"
                     background="#6AA8FF"
                     onclose={() => closeApp("mail")}
                 >
-                    <div className="p-4 text-black">
-                        <h1 className="text-xl mb-3">Your Inbox</h1>
-                        <p>No new messages.</p>
-                    </div>
+                    <EmailClient
+                        gameState={progress}
+                        onMarkAsRead={(emailId) => {
+                            storyManagerRef.current!.advance();
+                            setProgress((prev) => ({
+                                ...prev,
+                                emails: {
+                                    ...prev.emails,
+                                    [emailId]: {
+                                        ...prev.emails[emailId as keyof typeof prev.emails],
+                                        read: true,
+                                    },
+                                },
+                                currentStoryEvent: storyManagerRef.current!.getCurrentEventKey(),
+                            }));
+                        }}
+                    />
                 </WinBox>
             )}
 
-            {/* Menu Window */}
             {showApp.menu && (
                 <WinBox
                     width={350}
@@ -212,7 +312,38 @@ function App() {
                 </WinBox>
             )}
 
-            {/* Desktop Icons */}
+            {showApp.admin && (
+                <WinBox
+                    width={700}
+                    height={500}
+                    x={100}
+                    y={100}
+                    title="⚙️ Admin Panel"
+                    background="#0f172a"
+                    onclose={() => closeApp("admin")}
+                >
+                    <AdminPanel
+                        state={progress}
+                        setState={setProgress}
+                        onTriggerEmail={(emailId) => {
+                            setProgress((prev) => ({
+                                ...prev,
+                                emails: {
+                                    ...prev.emails,
+                                    [emailId]: {
+                                        ...prev.emails[emailId as keyof typeof prev.emails],
+                                        shown: true,
+                                    },
+                                },
+                            }));
+                        }}
+                        onShowCutscene={(cutsceneId) => {
+                            setCurrentCutscene(cutsceneId);
+                        }}
+                    />
+                </WinBox>
+            )}
+
             <div id="apps" className="absolute top-0 left-0 m-4 flex flex-row gap-8 z-10">
                 <DesktopIcon
                     icon="./terminal.png"
@@ -223,7 +354,7 @@ function App() {
                     icon="./fm_logo.png"
                     label="TULBird"
                     onClick={() => openApp("mail")}
-                    notifCount={notifCount}
+                    notifCount={unreadEmailCount}
                 />
                 <DesktopIcon
                     icon="./gear.png"
@@ -235,7 +366,12 @@ function App() {
                     label="Notepad"
                     onClick={() => openApp("notepad")}
                 />
-            </div>
+                <DesktopIcon
+                    icon="./gear.png"
+                    label="Admin"
+                    onClick={() => openApp("admin")}
+                />
+                </div>
         </div>
     );
 }
