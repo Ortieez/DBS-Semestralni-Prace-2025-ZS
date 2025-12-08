@@ -34,13 +34,13 @@ function App() {
     });
 
     useInterval(() => {
-        if (progress.username) {
+        if (progress.username && !isLocked) {
             save(db, progress, notepad);
         }
     }, 5 * 60 * 1000); // needs milliseconds 5 minutes = 5 * 60 * 1000
 
     useEffect(() => {
-        saveNotepad(notepad);
+        saveNotepad(notepad, true);
     }, [notepad]);
 
     useEffect(() => {

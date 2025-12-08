@@ -41,9 +41,9 @@ const loadProgress = (): State | null => {
     return JSON.parse(stringedJson);
 }
 
-export const saveNotepad = (data: string) => {
+export const saveNotepad = (data: string, showToast = false) => {
     localStorage.setItem(NOTEPAD_DATA, data);
-    toast.success("Successfully saved your notepad!");
+    if (showToast) toast.success("Successfully saved your notepad!");
 }
 
 const loadNotepad = () => {
