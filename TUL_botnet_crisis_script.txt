@@ -564,6 +564,8 @@ incrementing the value by 1.
 |    WHERE log_msg LIKE '%level 3 hash%'  |
 |    AND log_msg LIKE '%reset%'           |
 |  )                                      |
+|  WHERE log_msg LIKE '%level 3 hash%'    |
+|  AND log_msg LIKE '%update%'            |
 -------------------------------------------
 
 // returns the amount by which the key was incremented since the last reset
@@ -730,5 +732,6 @@ look at the clock...
 *********************************************************************************************
 
                         <-   C R E D I T S   R O L L   ->
+
 
 
