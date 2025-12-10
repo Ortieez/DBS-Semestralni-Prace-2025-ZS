@@ -123,13 +123,13 @@ SUSPICIOUS BEHAVIOR 2/2
 
 Also the botnet is ussualy spreading in the night. Mostly
 between 2:00 and 4:00 AM
--------------------------------------------------------------
+------------------------------------------------------------
 
 WHICH PC IS THE SOURCE
 
 The source PC will be in the top 3 in both categories
 described in SUSPICIOUS BEHAVIOR
--------------------------------------------------------------
+------------------------------------------------------------
 
 
 SECTION #4
@@ -139,7 +139,7 @@ GETTING ACCESS TO SOURCE PC
 
 The source PC is level 3, so you will need a level 3 user's
 password.
------------------------------------------------------------
+------------------------------------------------------------
 
 GETTING ACCES TO SOURCE PC
 
@@ -151,5 +151,23 @@ LEVEL 3 DEHASHING
 You can get the info about reseting and updating the
 hashing key from the network logs
 ----------------------------------------------------------
+
+WHERE IS THE BOTNET SCRIPT 1/2
+
+The script will be hiding very deep...
+----------------------------------------------------------
+
+WHERE IS THE BOTNET SCRIPT 2/2
+
+It is in the deepest folder (most layers). You will
+probably need recursive selecting
+----------------------------------------------------------
+
+WHICH FILE IS THE BAD GUY
+
+Read security_log.txt. You will have to figure the rest
+out on your own.
+----------------------------------------------------------
+
 
 
