@@ -108,25 +108,48 @@ BREAKING INTO ROUTER2 2/3
 Maybe some  clue could be in the available files...
 ------------------------------------------------------------
 
-BREAKING INTO ROUTER2 1/3
+BREAKING INTO ROUTER2 3/3
 
 The logs have timestamps with the exact time of the action
 ------------------------------------------------------------
 
-SUSPICIOUS BEHAVIOR
+SUSPICIOUS BEHAVIOR 1/2
 
 The source PC will probably send a lot of data to a lot of
-different IPs -> a lot of logs
+different IPs outside the local network -> a lot of logs
 ------------------------------------------------------------
 
-SUSPICIOUS BEHAVIOR
+SUSPICIOUS BEHAVIOR 2/2
 
 Also the botnet is ussualy spreading in the night. Mostly
 between 2:00 and 4:00 AM
+-------------------------------------------------------------
+
+WHICH PC IS THE SOURCE
+
+The source PC will be in the top 3 in both categories
+described in SUSPICIOUS BEHAVIOR
+-------------------------------------------------------------
 
 
 SECTION #4
 ************************************************************
 
+GETTING ACCESS TO SOURCE PC
+
+The source PC is level 3, so you will need a level 3 user's
+password.
+-----------------------------------------------------------
+
+GETTING ACCES TO SOURCE PC
+
+Some advice might be on level 2 computers
+-----------------------------------------------------------
+
+LEVEL 3 DEHASHING
+
+You can get the info about reseting and updating the
+hashing key from the network logs
+----------------------------------------------------------
 
 
