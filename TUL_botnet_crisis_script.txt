@@ -423,30 +423,6 @@ initialized
 // Enter the timestamp of the log
 
 
--------------------------------------------
-|  SQL:                                   |
-|                                         |
-|  SELECT source_ip, COUNT(*) AS num_logs |
-|  FROM Logs                              |
-|  GROUP BY source_ip                     |
-|  ORDER BY num_logs DESC                 |
--------------------------------------------
-
-// returns the number of logs sent from each IP
-
-
------------------------------------------------------------------
-|  SQL:                                                         |
-|                                                               |
-|  SELECT source_ip, COUNT(DISTINCT destination_ip) AS num_dest |
-|  FROM Logs                                                    |
-|  GROUP BY source_ip                                           |
-|  ORDER BY num_dest DESC                                       |
------------------------------------------------------------------
-
-// returns the number of 
-
-
 // the source PC is the one that is in the top 3 in these categories:
 //    1. most logs outside network
 //    2. most logs between 2:00 and 4:00 AM
@@ -474,6 +450,40 @@ initialized
 -----------------------------------------------------------------
 
 // returns the IP of the source PC
+
+
+---------------------------------------------------------------------------------------------
+FILE NAME: Firewall Level 3 Security Update
+
+CONTENT:
+
+The password for level 3 of the firewall has been set to first three digits of the ip of the
+PC that recieves the most logs overall. And the last digit of all distinct IPs inside the
+local network that this PC sends logs to
+---------------------------------------------------------------------------------------------
+
+------------------------------------------------
+|  SQL:                                        |
+|                                              |
+|  SELECT destination_ip, COUNT(*) AS num_logs |
+|  FROM Logs                                   |
+|  GROUP BY destination_ip                     |
+|  ORDER BY num_logs DESC                      |
+------------------------------------------------
+
+// returns the number of logs recieved by each IP
+
+------------------------------------------------------
+|  SQL:                                              |
+|                                                    |
+|  SELECT COUNT(DISTINCT destination_ip) AS num_dest |
+|  FROM Logs                                         |
+|  WHERE source_ip = <ip>                            |
+|  AND destination_ip IN (                           |
+|    SELECT ip FROM All_IPs                          |
+------------------------------------------------------
+
+// returns the number of 
 
 
 ----------------------------
@@ -720,4 +730,5 @@ look at the clock...
 *********************************************************************************************
 
                         <-   C R E D I T S   R O L L   ->
+
 
