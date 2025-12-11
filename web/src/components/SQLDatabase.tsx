@@ -2,6 +2,7 @@ import {useState, useEffect, useRef} from "react"
 import {type Database} from "sql.js"
 import type {State} from "../utils/state"
 import PasswordPrompt from "./PasswordPrompt"
+import logger from "../utils/logger"
 
 interface HistoryEntry {
     input: string
@@ -166,6 +167,9 @@ export default function SqlJsPage(props: {
     const [connectedTo, setConnectedTo] = useState<string | null>(null)
     const [pendingCommand, setPendingCommand] = useState<string | null>(null)
     const [showPasswordPrompt, setShowPasswordPrompt] = useState(false)
+    const [showConnectionPrompt, setShowConnectionPrompt] = useState(true)
+    const [connectionIp, setConnectionIp] = useState('')
+    const [connectionError, setConnectionError] = useState('')
     const [passwordContext, setPasswordContext] = useState<'firewall' | 'pc_access' | 'router' | null>(null)
     const inputRef = useRef<HTMLTextAreaElement>(null)
     const suggestionsRef = useRef<HTMLDivElement>(null)
@@ -203,7 +207,7 @@ export default function SqlJsPage(props: {
                 setTableColumns(cols)
             }
         } catch (err) {
-            console.error('Error loading schema:', err)
+            logger.error('Error loading schema:', err)
         }
     }, [props.loadedDb])
 
@@ -603,6 +607,21 @@ export default function SqlJsPage(props: {
         if (!db) return
         
         const normalizedCmd = cmd.trim().replace(/\s+/g, ' ').toUpperCase()
+        
+        // Allow only CONNECT command when not connected
+        if (!connectedTo && !normalizedCmd.startsWith('CONNECT')) {
+            setHistory((prev) => [
+                ...prev,
+                {
+                    input: cmd,
+                    output: null,
+                    error: 'ERROR: Not connected to any database.\nUse CONNECT <ip_address> to connect first.',
+                    connectedTo: null,
+                },
+            ])
+            return
+        }
+        
         const isLocal = !connectedTo || connectedTo === '127.0.0.1'
 
         // Check permissions based on story progress and connection context
@@ -630,6 +649,7 @@ export default function SqlJsPage(props: {
             const match = address.match(ipPattern)
             
             if (!match) {
+                setConnectionError('Invalid IP address format. Expected: xxx.xxx.xxx.xxx')
                 setHistory((prev) => [
                     ...prev,
                     {
@@ -645,6 +665,7 @@ export default function SqlJsPage(props: {
             // Check each octet is between 0-255
             const octets = [match[1], match[2], match[3], match[4]].map(Number)
             if (octets.some(octet => octet > 255)) {
+                setConnectionError('Invalid IP address. Each octet must be between 0 and 255.')
                 setHistory((prev) => [
                     ...prev,
                     {
@@ -658,6 +679,9 @@ export default function SqlJsPage(props: {
             }
             
             setConnectedTo(address)
+            setConnectionError('')
+            setConnectionIp('')
+            setShowConnectionPrompt(false)
             setHistory((prev) => [
                 ...prev,
                 {
@@ -674,6 +698,9 @@ export default function SqlJsPage(props: {
         if (cmd.toUpperCase().startsWith('DISCONNECT')) {
             const previousConnection = connectedTo
             setConnectedTo(null)
+            setShowConnectionPrompt(true)
+            setConnectionIp('')
+            setConnectionError('')
             setHistory((prev) => [
                 ...prev,
                 {
@@ -917,7 +944,7 @@ export default function SqlJsPage(props: {
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault()
                 setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length)
-            } else if (e.key === 'Tab' || e.key === 'Enter') {
+            } else if (e.key === 'Tab') {
                 if (suggestions.length > 0) {
                     e.preventDefault()
                     applySuggestion(suggestions[selectedIndex])
@@ -933,13 +960,12 @@ export default function SqlJsPage(props: {
             const command = e.currentTarget.value.trim()
             if (command.length > 0) runCommand(command)
             e.currentTarget.value = ""
+            e.currentTarget.style.height = 'auto'
             setShowSuggestions(false)
         }
     }
 
-    const onInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
-        updateSuggestions(e.currentTarget.value)
-    }
+
 
     const ResultTable = ({columns, values}: ResultTableProps) => (
         <table className="border-collapse mt-1">
@@ -1007,9 +1033,16 @@ export default function SqlJsPage(props: {
                     <textarea
                         ref={inputRef}
                         onKeyDown={onKeyDown}
-                        onInput={onInput}
-                        className="bg-black text-green-400 outline-none resize-none w-full h-5 leading-5"
-                        placeholder="Type SQL command... (Tab to autocomplete)"
+                        onInput={(e) => {
+                            const target = e.currentTarget;
+                            target.style.height = 'auto';
+                            target.style.height = target.scrollHeight + 'px';
+                            updateSuggestions(target.value);
+                        }}
+                        className="bg-black text-green-400 outline-none resize-none w-full min-h-[20px] leading-5"
+                        placeholder="Type SQL command... (Shift+Enter for new line, Enter to execute)"
+                        rows={1}
+                        style={{height: 'auto'}}
                     />
 
                     {showSuggestions && suggestions.length > 0 && (
@@ -1043,6 +1076,48 @@ export default function SqlJsPage(props: {
                     )}
                 </div>
             </div>
+            
+            {showConnectionPrompt && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-gray-900 border-2 border-green-400 rounded p-6 min-w-[400px]">
+                        <h2 className="text-green-400 text-xl mb-4 font-bold">ENTER AN IP TO CONNECT TO SQL TERMINAL</h2>
+                        <input
+                            type="text"
+                            value={connectionIp}
+                            onChange={(e) => {
+                                setConnectionIp(e.target.value)
+                                setConnectionError('')
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (connectionIp.trim()) {
+                                        runCommand(`CONNECT ${connectionIp.trim()}`);
+                                    }
+                                }
+                            }}
+                            className="w-full bg-black text-green-400 border border-green-400 rounded px-3 py-2 outline-none focus:border-green-300"
+                            placeholder="e.g., 192.168.1.100"
+                            autoFocus
+                        />
+                        {connectionError && (
+                            <div className="text-red-500 text-sm mt-2 mb-2">{connectionError}</div>
+                        )}
+                        <div className="flex justify-end gap-2 mt-4">
+                            <button
+                                onClick={() => {
+                                    if (connectionIp.trim()) {
+                                        runCommand(`CONNECT ${connectionIp.trim()}`);
+                                    }
+                                }}
+                                className="px-4 py-2 bg-green-700 hover:bg-green-600 text-white rounded"
+                            >
+                                Connect
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             
             {showPasswordPrompt && (
                 <PasswordPrompt 

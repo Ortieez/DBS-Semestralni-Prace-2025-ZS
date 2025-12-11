@@ -19,6 +19,7 @@ import Notepad from "./components/Notepad.tsx";
 import {NOTEPAD_DATA} from "./utils/const.ts";
 import {CREATE_SQL_TEMPLATE} from "./utils/templateDB/create.ts";
 import {StoryManager} from "./utils/storyFlow.ts";
+import logger from "./utils/logger.ts";
 
 function App() {
     const [isLocked, setIsLocked] = useState(true);
@@ -38,7 +39,50 @@ function App() {
     const [notepad, setNotepad] = useState(() => {
         return localStorage.getItem(NOTEPAD_DATA) || "";
     });
+    const minimizedWindowsRef = useRef<Array<{id: string, state: any}>>([])
 
+    // Helper function to get/store winbox instances
+    const getWindowByTitle = (title: string) => {
+        const elements = document.querySelectorAll('.winbox');
+        for (const el of elements) {
+            const titleEl = el.querySelector('.wb-title');
+            if (titleEl && titleEl.textContent?.includes(title)) {
+                logger.log(`Found window: ${title}`, (el as any).winbox);
+                return (el as any).winbox;
+            }
+        }
+        logger.log(`Window not found: ${title}`);
+        return null;
+    };
+
+    const minimizeAllWindows = () => {
+        logger.log('Minimizing all windows...');
+        minimizedWindowsRef.current = [];
+        const windowTitles = ['SQL', 'TULBird', 'Menu', 'Notepad', 'Admin'];
+        windowTitles.forEach(title => {
+            const winbox = getWindowByTitle(title);
+            if (winbox && !winbox.hidden && !winbox.min) {
+                logger.log(`Minimizing: ${title}`);
+                minimizedWindowsRef.current.push({
+                    id: title,
+                    state: {x: winbox.x, y: winbox.y, width: winbox.width, height: winbox.height}
+                });
+                winbox.minimize();
+            }
+        });
+    };
+
+    const restoreAllWindows = () => {
+        logger.log('Restoring windows...', minimizedWindowsRef.current);
+        minimizedWindowsRef.current.forEach(({id}) => {
+            const winbox = getWindowByTitle(id);
+            if (winbox) {
+                logger.log(`Restoring: ${id}`);
+                winbox.restore();
+            }
+        });
+        minimizedWindowsRef.current = [];
+    };
 
     const storyManagerRef = useRef<StoryManager | null>(null);
     if (!storyManagerRef.current) {
@@ -82,12 +126,19 @@ function App() {
 
                 setSQL(SQL as any);
             })
-            .catch((err) => console.error(err));
+            .catch((err) => logger.error(err));
     }, []);
 
     useEffect(() => {
         if (!isLocked) save(db, progress, notepad);
     }, [isLocked]);
+
+    // Minimize windows when cutscene starts
+    useEffect(() => {
+        if (currentCutscene) {
+            minimizeAllWindows();
+        }
+    }, [currentCutscene]);
 
     useEffect(() => {
         if (isLocked || !storyManagerRef.current) return;
@@ -179,6 +230,9 @@ function App() {
                     cutsceneId={currentCutscene}
                     gameState={progress}
                     onComplete={() => {
+                        // Restore minimized windows
+                        restoreAllWindows();
+
                         storyManagerRef.current!.advance();
                         setProgress((prev) => ({
                             ...prev,
