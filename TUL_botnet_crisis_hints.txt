@@ -1,7 +1,9 @@
 TUL: Botnet Crisis
 
 HINTS:
-************************************************************
+////////////////////////////////////////////////////////////
+
+
 
 SECTION INDEPENDENT
 ************************************************************
@@ -15,6 +17,11 @@ Syntax:
 SELECT [column_name], [column_name], ...
 FROM <table_name>
 [WHERE <condition>]
+[GROUP BY <column_name>, [column_name], ... ]
+[HAVING <condition>]
+[ORDER BY <column_name>, [column_name], ... ]
+
+TIP: To select all columns use SELECT * FROM...
 ------------------------------------------------------------
 
 SQL UPDATE
@@ -67,7 +74,76 @@ Syntax:
 Table T1 JOIN Table T2 ON <condition>
 
 -> the condition is usually
-T1.<column_name> = T2.<column_name>, 
+T1.<column_name> = T2.<column_name>, where the columns
+represent a matching property
+
+
+Types of JOINs:
+1. (INNER) JOIN -> returns records that have matching values
+                   in both tables
+
+2. LEFT JOIN    -> returns all records from the left table
+                   and matching records from the right one
+
+2. RIGHT JOIN   -> returns all records from the right table
+                   and matching records from the left one
+
+3. FULL JOIN    -> returns all records when there is a match
+                   in either left or right table
+------------------------------------------------------------
+
+SQL AGREGATE (COUNTING) FUNCTIONS
+
+COUNT(<column_name>)
+-> returns the count of rows where the value in the
+   specified column is not null (empty)
+
+SUM(<column_name>)
+-> returns the sum of all values in the specified column
+
+AVG(<column_name>)
+-> returns the average of all values in the specified
+   column
+
+MAX(<column_name>)
+-> returns the maximum value in the specified column
+
+MIN(<column_name>)
+-> returns the minimum value in the specified column
+
+Syntax:
+
+SELECT COUNT(<column_name>)
+FROM <Table_name>
+
+- same for SUM, AVG, MIN and MAX
+------------------------------------------------------------
+
+SQL DISTINCT
+
+If you want to eliminate duplicate values in an SQL query
+use the DISTINCT keyword
+
+Example:
+
+SELECT COUNT(DISTINCT <column_name>)
+FROM <Table_name>
+------------------------------------------------------------
+
+SQL (DE)HASHING
+
+You can hash a text with this command:
+
+AES_ENCRYPT(password, PASSWORD(<hashing_key>))
+
+and dehash it with this one:
+
+AES_DECRYPT(password, PASSWORD(<hashing_key>))
+
+NOTE: to succesfully dehash the text, the key has to be the
+same one used to hash it
+------------------------------------------------------------
+
 
 
 SECTION #1
@@ -199,6 +275,7 @@ WHICH FILE IS THE BAD GUY
 Read security_log.txt. You will have to figure the rest
 out on your own.
 ----------------------------------------------------------
+
 
 
 
