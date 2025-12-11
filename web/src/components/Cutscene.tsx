@@ -11,6 +11,7 @@ interface CutsceneProps {
     onSkip?: () => void;
 }
 
+// @ts-ignore
 export const Cutscene = ({cutsceneId, gameState, audioUrl, onComplete, onSkip}: CutsceneProps) => {
     const [isFinished, setIsFinished] = useState(false);
     const [hasSkipped, setHasSkipped] = useState(false);
