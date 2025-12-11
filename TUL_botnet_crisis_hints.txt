@@ -38,6 +38,37 @@ INSERT INTO <table_name> [column_name, column_name, ...]
 VALUES (value_column1, value_column2, ...)
 ------------------------------------------------------------
 
+SQL LIKE AND WILDCARDS
+
+Used when you only want to use a part of the attribute as
+the condition in the WHERE clause. You can use wildcards:
+
+_  -> represents a single character (of any value)
+
+%  -> represents zero or more characters
+
+[]  -> represents any character(s) you put in the brackets
+
+^[] -> any charachter not in the brackets
+
+Syntax:
+
+SELECT [column_name]
+FROM <table_name>
+WHERE <column_name> LIKE '<text_with_wild_cards>'
+-----------------------------------------------------------
+
+SQL JOINS
+
+Joins two tables on a specified condition
+
+Syntax:
+
+Table T1 JOIN Table T2 ON <condition>
+
+-> the condition is usually
+T1.<column_name> = T2.<column_name>, 
+
 
 SECTION #1
 ************************************************************
@@ -168,6 +199,7 @@ WHICH FILE IS THE BAD GUY
 Read security_log.txt. You will have to figure the rest
 out on your own.
 ----------------------------------------------------------
+
 
 
 
