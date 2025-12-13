@@ -8,6 +8,12 @@ HINTS:
 SECTION INDEPENDENT
 ************************************************************
 
+SQL EXTERN HELP
+
+If you cannot find the desired information in my notes,
+look at this website: https://www.w3schools.com/sql/
+------------------------------------------------------------
+
 SQL SELECT
 
 Used to retrieve specific data from a table
@@ -144,6 +150,51 @@ NOTE: to succesfully dehash the text, the key has to be the
 same one used to hash it
 ------------------------------------------------------------
 
+SQL SET OPERATIONS
+
+Set operations can be performed between two select queries
+that return the same type of information. All set operations
+remove duplicate values by default
+
+UNION -> returns all values from set A and B
+
+INTERSECT -> returns only values present in both sets
+
+EXCEPT -> returns values from set A that are not present
+          in set B
+
+Syntax:
+
+SELECT <column_name>
+FROM <table_name>
+
+UNION
+
+SELECT <column_name>
+FROM <table_name>
+
+- same for intersect and except
+------------------------------------------------------------
+
+SQL RECURSIVE SELECT
+
+Used on tables with self relation (like Directories in this
+database).
+
+Syntax:
+
+WITH RECURSIVE [cte name] AS (
+
+  [base case]
+
+  UNION ALL
+
+  [recursive case]
+)
+
+[primary query]
+------------------------------------------------------------
+
 
 
 SECTION #1
@@ -275,6 +326,7 @@ WHICH FILE IS THE BAD GUY
 Read security_log.txt. You will have to figure the rest
 out on your own.
 ----------------------------------------------------------
+
 
 
 
