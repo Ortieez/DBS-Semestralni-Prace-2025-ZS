@@ -43,6 +43,8 @@ function checkCommandPermissions(
     
     const cmdType = normalizedCmd.split(' ')[0]
     
+    //THIS WHOLE SECTION COULD BE REMOVED
+    //---------------------------------------------------------------------------------------------------------------
     const localOnlyCommands = ['SELECT', 'INSERT']
     const remoteOnlyCommands = ['UPDATE', 'DELETE']
     
@@ -59,6 +61,7 @@ function checkCommandPermissions(
             errorMessage: `ERROR: ${cmdType} commands can only be executed on local database.\nPlease DISCONNECT from remote server first.`
         }
     }
+    //-------------------------------------*END OF REMOVABLE SECTION *---------------------------------------------
     
     if (normalizedCmd.includes('LOGS')) {
         if (!gameState.storyProgress.unlocked_any_router) {
@@ -216,6 +219,11 @@ export default function SqlJsPage(props: {
         const lastWord = words[words.length - 1]?.toUpperCase() || ''
         const prevWord = words[words.length - 2]?.toUpperCase() || ''
 
+        // THIS SHOULD PREVENT FURTHER SUGGESTING A WORD, TAHT IS ALREADY TYPED IN
+        // THUS ALLOWING THE USER TO RUN THE CODE WITHOUT ADDING ";" AT THE END
+    
+        // if (SQL_KEYWORDS.includes(lastWord)) return []
+
         if (!lastWord && !text.endsWith(' ')) return []
 
         const suggestions: Suggestion[] = []
@@ -223,6 +231,11 @@ export default function SqlJsPage(props: {
         // After FROM, JOIN, or INTO - suggest tables
         if (['FROM', 'JOIN', 'INTO', 'UPDATE', 'TABLE'].includes(prevWord)) {
             tables.forEach(table => {
+                // THIS SHOULD PREVENT FURTHER SUGGESTING A WORD, TAHT IS ALREADY TYPED IN
+                // THUS ALLOWING THE USER TO RUN THE CODE WITHOUT ADDING ";" AT THE END
+    
+                // if (table === lastWord) return []
+
                 if (table.toUpperCase().startsWith(lastWord)) {
                     suggestions.push({text: table, type: 'table'})
                 }
@@ -234,6 +247,11 @@ export default function SqlJsPage(props: {
             mentionedTables.forEach(table => {
                 tableColumns[table]?.forEach(col => {
                     if (col.toUpperCase().startsWith(lastWord)) {
+                        // THIS SHOULD PREVENT FURTHER SUGGESTING A WORD, TAHT IS ALREADY TYPED IN
+                        // THUS ALLOWING THE USER TO RUN THE CODE WITHOUT ADDING ";" AT THE END
+    
+                        // if (col === lastWord) return []
+
                         suggestions.push({
                             text: col,
                             type: 'column',
