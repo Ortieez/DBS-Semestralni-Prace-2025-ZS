@@ -116,6 +116,32 @@ function App() {
                     setDb(loadedData.db);
                 } else {
                     let tempDB = new SQL.Database();
+                    
+                    tempDB.create_function("AES_ENCRYPT", (text: string, key: string) => {
+                        let result = "";
+                        for (let i = 0; i < text.length; i++) {
+                            result += String.fromCharCode(
+                                text.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+                            );
+                        }
+                        return btoa(result);
+                    });
+
+                    tempDB.create_function("AES_DECRYPT", (encrypted: string, key: string) => {
+                        try {
+                            const decoded = atob(encrypted);
+                            let result = "";
+                            for (let i = 0; i < decoded.length; i++) {
+                                result += String.fromCharCode(
+                                    decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length)
+                                );
+                            }
+                            return result;
+                        } catch {
+                            return encrypted;
+                        }
+                    });
+                    
                     tempDB!.exec(CREATE_SQL_TEMPLATE);
                     setDb(tempDB);
                 }

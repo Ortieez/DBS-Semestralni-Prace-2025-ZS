@@ -1,8 +1,13 @@
 export const CREATE_SQL_TEMPLATE = `
 -- Created by Redgate Data Modeler (https://datamodeler.redgate-platform.com)
--- Last modification date: 2025-12-07 19:43:42.84
+-- Last modification date: 2025-12-15 21:18:21.687
 
 -- tables
+-- Table: All_IPs
+CREATE TABLE All_IPs (
+    IP varchar(14) NOT NULL CONSTRAINT All_IPs_pk PRIMARY KEY
+);
+
 -- Table: Content
 CREATE TABLE Content (
     id int NOT NULL CONSTRAINT content_pk PRIMARY KEY,
@@ -12,6 +17,7 @@ CREATE TABLE Content (
 -- Table: Directories
 CREATE TABLE Directories (
     id integer NOT NULL CONSTRAINT Directories_pk PRIMARY KEY,
+    name varchar(50) NOT NULL,
     content integer,
     id_parent integer,
     locked boolean NOT NULL,
@@ -29,6 +35,13 @@ CREATE TABLE Firewall (
     id integer NOT NULL CONSTRAINT Firewall_pk PRIMARY KEY,
     level integer NOT NULL,
     status varchar(8) NOT NULL
+);
+
+-- Table: Hints
+CREATE TABLE Hints (
+    id integer NOT NULL CONSTRAINT Hints_pk PRIMARY KEY,
+    title text NOT NULL,
+    content text NOT NULL
 );
 
 -- Table: Log
@@ -82,61 +95,45 @@ CREATE TABLE User_has_access_to_PC (
 
 -- ========== GAME DATA ==========
 
--- Main router (from email)
-INSERT INTO Router VALUES ("174.156.12.4", 0);
-
--- All 4 firewall levels
-INSERT INTO Firewall VALUES (0, 1, "active");
-INSERT INTO Firewall VALUES (1, 2, "active");
-INSERT INTO Firewall VALUES (2, 3, "active");
-INSERT INTO Firewall VALUES (3, 4, "active");
-
--- PC 1 - student PC (permission level 0)
-INSERT INTO PC VALUES ("192.168.100.129", "174.156.12.4", 0);
-
--- Student user (default credentials)
+-- student user, heslo nešifrovaný student, uroven a permise 0
 INSERT INTO User VALUES ("student", "student", 0);
 
--- Level 1 users (for hashing progression)
-INSERT INTO User VALUES ("alice", "hashed_pw1", 1);
-INSERT INTO User VALUES ("bob", "hashed_pw2", 1);
-INSERT INTO User VALUES ("charlie", "hashed_pw3", 1);
+-- worker user, heslo šifrovaný x, uroven a permise 2
+INSERT INTO User VALUES ("worker", AES_ENCRYPT("x","sFFFwa"), 2);
 
--- Users whose names start with F (for router password calculation)
-INSERT INTO User VALUES ("Frank", "pw_frank", 2);
-INSERT INTO User VALUES ("Fiona", "pw_fiona", 3);
+-- admin user, heslo šifrovaný Tracheobionta, uroven a permise 3
+INSERT INTO User VALUES ("admin", AES_ENCRYPT("Tracheobionta", "5+pocetlogu"), 3);
 
--- ========== PC 1 FILES ==========
+-- pc 1, pod def routerem, s permisema 0 a userem student
+INSERT INTO PC VALUES ("192.168.100.129", "174.156.12.4", 0);
 
--- File 1: Contains firewall level 1 password
-INSERT INTO Content VALUES (0, "CONFIDENTIAL MEMO
-Date: 2025-12-01
+-- pc 2, pod def routerem, s permisema 1
+INSERT INTO PC VALUES ("192.168.100.130", "174.156.12.4", 1);
 
-Firewall level 1 password: FireWall1Pass
+-- firewall 1, id 0, level 1, status "active"
+INSERT INTO Firewall VALUES (0,1,"active");
 
-Keep this secure!");
+-- firewall 2, id 1, level 2, status "active"
+INSERT INTO Firewall VALUES (1,2,"active");
 
-INSERT INTO Directories VALUES (0, 0, NULL, 0, "192.168.100.129");
+-- Soubor 1 s hash heslem pro user permise 1
+INSERT INTO Directories VALUES (0,"HASHING.txt",0,NULL,0,"192.168.100.129");
 
--- File 2: Hashing hint
-INSERT INTO Content VALUES (1, "HASHING
+-- Soubor 2 o informaci tabulky All_IPs
+INSERT INTO Directories VALUES (1,"NEW_TABLE.txt",1,NULL,0,"192.168.100.130");
 
-The new hashing key for level 1 staff is set to the number of PCs in the network.");
+-- content souboru 1
+INSERT INTO Content VALUES (0, "The new hashing key for level 1 staff is set to the number of PCs in the network.");
 
-INSERT INTO Directories VALUES (1, 1, NULL, 0, "192.168.100.129");
-
--- File 3: All_IPs table hint
-INSERT INTO Content VALUES (2, "NEW TABLE
-
-There is a table called All_IPs.
-contents:   device_id   ip");
-
-INSERT INTO Directories VALUES (2, 2, NULL, 0, "192.168.100.129");
-
--- File 4: Router password hint
-INSERT INTO Content VALUES (3, "NEW ROUTER PASSWORD
-
-Router password was set to the sum of the clearance levels of all staff whose name starts with the letter F");
-
-INSERT INTO Directories VALUES (3, 3, NULL, 0, "192.168.100.129");
+-- content souboru 2
+INSERT INTO Content VALUES (1, "There is a table called All_IPs.");
 `
+
+// -- F user, heslo šifrovaný x, uroven a permise 1
+// INSERT INTO User VALUES ("F", AES_ENCRYPT("x","2"), 1);
+
+// -- F user, heslo šifrovaný x, uroven a permise 1
+// INSERT INTO User VALUES ("F", AES_ENCRYPT("x","2"), 1);
+
+// -- F user, heslo šifrovaný x, uroven a permise 1
+// INSERT INTO User VALUES ("F", AES_ENCRYPT("x","2"), 1);

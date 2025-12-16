@@ -43,25 +43,25 @@ function checkCommandPermissions(
     
     const cmdType = normalizedCmd.split(' ')[0]
     
-    //THIS WHOLE SECTION COULD BE REMOVED
-    //---------------------------------------------------------------------------------------------------------------
-    const localOnlyCommands = ['SELECT', 'INSERT']
-    const remoteOnlyCommands = ['UPDATE', 'DELETE']
+    // //THIS WHOLE SECTION COULD BE REMOVED
+    // //---------------------------------------------------------------------------------------------------------------
+    // const localOnlyCommands = ['SELECT', 'INSERT']
+    // const remoteOnlyCommands = ['UPDATE', 'DELETE']
     
-    if (isLocal && remoteOnlyCommands.includes(cmdType)) {
-        return {
-            allowed: false,
-            errorMessage: `ERROR: ${cmdType} commands can only be executed on remote connections.\nPlease CONNECT to a remote server first.`
-        }
-    }
+    // if (isLocal && remoteOnlyCommands.includes(cmdType)) {
+    //     return {
+    //         allowed: false,
+    //         errorMessage: `ERROR: ${cmdType} commands can only be executed on remote connections.\nPlease CONNECT to a remote server first.`
+    //     }
+    // }
     
-    if (!isLocal && localOnlyCommands.includes(cmdType)) {
-        return {
-            allowed: false,
-            errorMessage: `ERROR: ${cmdType} commands can only be executed on local database.\nPlease DISCONNECT from remote server first.`
-        }
-    }
-    //-------------------------------------*END OF REMOVABLE SECTION *---------------------------------------------
+    // if (!isLocal && localOnlyCommands.includes(cmdType)) {
+    //     return {
+    //         allowed: false,
+    //         errorMessage: `ERROR: ${cmdType} commands can only be executed on local database.\nPlease DISCONNECT from remote server first.`
+    //     }
+    // }
+    // //-------------------------------------*END OF REMOVABLE SECTION *---------------------------------------------
     
     if (normalizedCmd.includes('LOGS')) {
         if (!gameState.storyProgress.unlocked_any_router) {
