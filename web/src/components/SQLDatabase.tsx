@@ -980,8 +980,27 @@ export default function SqlJsPage(props: {
             return
         }
 
-        // Check if UPDATE command requires password (remote only)
-        if (connectedTo && connectedTo !== '174.156.12.4' && normalizedCmd.includes('UPDATE')) {
+        // Check if UPDATE Firewall command requires password
+        if (connectedTo && normalizedCmd.includes('UPDATE') && normalizedCmd.includes('FIREWALL')) {
+            // Show the command in history
+            setHistory((prev) => [
+                ...prev,
+                {
+                    input: cmd,
+                    output: null,
+                    error: null,
+                    connectedTo: connectedTo,
+                },
+            ])
+            
+            setPendingCommand(cmd)
+            setPasswordContext('firewall')
+            setShowPasswordPrompt(true)
+            return
+        }
+        
+        // Check if UPDATE command requires password (remote only, non-firewall)
+        if (connectedTo && connectedTo !== '174.156.12.4' && normalizedCmd.includes('UPDATE') && !normalizedCmd.includes('FIREWALL')) {
             // Show the command in history
             setHistory((prev) => [
                 ...prev,
