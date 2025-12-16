@@ -141,6 +141,10 @@ function App() {
                             return encrypted;
                         }
                     });
+
+                    tempDB.create_function("GETDATE", () => {
+                        return new Date().toISOString();
+                    });
                     
                     tempDB!.exec(CREATE_SQL_TEMPLATE);
                     setDb(tempDB);

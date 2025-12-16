@@ -1,6 +1,6 @@
 export const CREATE_SQL_TEMPLATE = `
 -- Created by Redgate Data Modeler (https://datamodeler.redgate-platform.com)
--- Last modification date: 2025-12-15 21:18:21.687
+-- Last modification date: 2025-12-16 20:09:36.447
 
 -- tables
 -- Table: All_IPs
@@ -47,12 +47,12 @@ CREATE TABLE Hints (
 -- Table: Log
 CREATE TABLE Log (
     id integer NOT NULL CONSTRAINT Log_pk PRIMARY KEY,
+    router_IP varchar(14) NOT NULL,
     source_ip varchar(14) NOT NULL,
-    destination_ip varchar(14) NOT NULL,
-    "action" varchar(20) NOT NULL,
+    destination_ip double precision NOT NULL,
+    log_message text NOT NULL,
     time datetime NOT NULL,
-    Router_IP varchar(14) NOT NULL,
-    CONSTRAINT Log_Router FOREIGN KEY (Router_IP)
+    CONSTRAINT Log_Router FOREIGN KEY (router_IP)
     REFERENCES Router (IP)
 );
 
@@ -90,13 +90,19 @@ CREATE TABLE User_has_access_to_PC (
 
 -- End of file.
 
-
-
-
 -- ========== GAME DATA ==========
 
 -- student user, heslo nešifrovaný student, uroven a permise 0
 INSERT INTO User VALUES ("student", "student", 0);
+
+-- F user, heslo šifrovaný x, uroven a permise 1
+INSERT INTO User VALUES ("Finn", AES_ENCRYPT("x","abc"), 1);
+
+-- F user, heslo šifrovaný x, uroven a permise 1
+INSERT INTO User VALUES ("Frank", AES_ENCRYPT("x","car"), 1);
+
+-- F user, heslo šifrovaný x, uroven a permise 1
+INSERT INTO User VALUES ("Fiona", AES_ENCRYPT("x","tractor"), 1);
 
 -- worker user, heslo šifrovaný x, uroven a permise 2
 INSERT INTO User VALUES ("worker", AES_ENCRYPT("x","sFFFwa"), 2);
@@ -127,13 +133,6 @@ INSERT INTO Content VALUES (0, "The new hashing key for level 1 staff is set to 
 
 -- content souboru 2
 INSERT INTO Content VALUES (1, "There is a table called All_IPs.");
-`
 
-// -- F user, heslo šifrovaný x, uroven a permise 1
-// INSERT INTO User VALUES ("F", AES_ENCRYPT("x","2"), 1);
-
-// -- F user, heslo šifrovaný x, uroven a permise 1
-// INSERT INTO User VALUES ("F", AES_ENCRYPT("x","2"), 1);
-
-// -- F user, heslo šifrovaný x, uroven a permise 1
-// INSERT INTO User VALUES ("F", AES_ENCRYPT("x","2"), 1);
+INSERT INTO Log VALUES (0,"174.156.12.4", "192.168.100.132","192.168.100.130", "password for firewall level 2 changed to: Smith", GETDATE());
+`;
