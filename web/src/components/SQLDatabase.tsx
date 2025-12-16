@@ -165,9 +165,12 @@ export default function SqlJsPage(props: {
     const [suggestions, setSuggestions] = useState<Suggestion[]>([])
     const [selectedIndex, setSelectedIndex] = useState(0)
     const [showSuggestions, setShowSuggestions] = useState(false)
+    const [suggestionsPosition, setSuggestionsPosition] = useState({ top: 0, left: 0 })
     const [tables, setTables] = useState<string[]>([])
     const [tableColumns, setTableColumns] = useState<Record<string, string[]>>({})
     const [connectedTo, setConnectedTo] = useState<string | null>(null)
+    const [currentUser, setCurrentUser] = useState<string | null>(null)
+    const [userPermission, setUserPermission] = useState<number>(0)
     const [pendingCommand, setPendingCommand] = useState<string | null>(null)
     const [showPasswordPrompt, setShowPasswordPrompt] = useState(false)
     const [showConnectionPrompt, setShowConnectionPrompt] = useState(true)
@@ -182,7 +185,8 @@ export default function SqlJsPage(props: {
         'DELETE', 'CREATE', 'TABLE', 'DROP', 'ALTER', 'JOIN', 'LEFT', 'RIGHT',
         'INNER', 'OUTER', 'ON', 'GROUP', 'BY', 'ORDER', 'ASC', 'DESC', 'LIMIT',
         'OFFSET', 'AS', 'AND', 'OR', 'NOT', 'NULL', 'IS', 'IN', 'LIKE', 'BETWEEN',
-        'DISTINCT', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'HAVING', 'CONNECT', 'DISCONNECT'
+        'DISTINCT', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'HAVING', 'CONNECT', 'DISCONNECT',
+        'AES_ENCRYPT', 'AES_DECRYPT'
     ]
 
     useEffect(() => {
@@ -222,7 +226,7 @@ export default function SqlJsPage(props: {
         // THIS SHOULD PREVENT FURTHER SUGGESTING A WORD, TAHT IS ALREADY TYPED IN
         // THUS ALLOWING THE USER TO RUN THE CODE WITHOUT ADDING ";" AT THE END
     
-        // if (SQL_KEYWORDS.includes(lastWord)) return []
+        if (SQL_KEYWORDS.includes(lastWord)) return []
 
         if (!lastWord && !text.endsWith(' ')) return []
 
@@ -234,7 +238,7 @@ export default function SqlJsPage(props: {
                 // THIS SHOULD PREVENT FURTHER SUGGESTING A WORD, TAHT IS ALREADY TYPED IN
                 // THUS ALLOWING THE USER TO RUN THE CODE WITHOUT ADDING ";" AT THE END
     
-                // if (table === lastWord) return []
+                if (table === lastWord) return []
 
                 if (table.toUpperCase().startsWith(lastWord)) {
                     suggestions.push({text: table, type: 'table'})
@@ -250,7 +254,7 @@ export default function SqlJsPage(props: {
                         // THIS SHOULD PREVENT FURTHER SUGGESTING A WORD, TAHT IS ALREADY TYPED IN
                         // THUS ALLOWING THE USER TO RUN THE CODE WITHOUT ADDING ";" AT THE END
     
-                        // if (col === lastWord) return []
+                        if (col === lastWord) return []
 
                         suggestions.push({
                             text: col,
@@ -277,6 +281,21 @@ export default function SqlJsPage(props: {
         setSuggestions(sugs)
         setShowSuggestions(sugs.length > 0)
         setSelectedIndex(0)
+        
+        // Calculate cursor position for suggestions dropdown
+        if (inputRef.current && sugs.length > 0) {
+            const textarea = inputRef.current
+            const cursorPos = textarea.selectionStart
+            const textBeforeCursor = value.substring(0, cursorPos)
+            const lines = textBeforeCursor.split('\n')
+            const currentLine = lines.length - 1
+            const lineHeight = 20 // Matches the leading-5 class (1.25rem * 16px = 20px)
+            
+            setSuggestionsPosition({
+                top: (currentLine + 1) * lineHeight,
+                left: 0
+            })
+        }
     }
 
     const applySuggestion = (suggestion: Suggestion) => {
@@ -304,7 +323,7 @@ export default function SqlJsPage(props: {
         setShowPasswordPrompt(false)
             
         // Handle firewall password on remote connection
-        if (connectedTo && connectedTo !== '127.0.0.1' && passwordContext === 'firewall') {
+        if (connectedTo && connectedTo !== '174.156.12.4' && passwordContext === 'firewall') {
                 // Check if it's an UPDATE Firewall command
                 if (normalizedPendingCmd.includes('UPDATE') && 
                     normalizedPendingCmd.includes('FIREWALL')) {
@@ -640,7 +659,118 @@ export default function SqlJsPage(props: {
             return
         }
         
-        const isLocal = !connectedTo || connectedTo === '127.0.0.1'
+        const isLocal = !connectedTo || connectedTo === '174.156.12.4'
+
+        // Handle LOGIN command
+        if (cmd.toUpperCase().startsWith('LOGIN')) {
+            const parts = cmd.trim().split(/\s+/)
+            const username = parts[1]
+            const password = parts[2]
+            
+            if (!username || !password) {
+                setHistory((prev) => [
+                    ...prev,
+                    {
+                        input: cmd,
+                        output: null,
+                        error: 'Usage: LOGIN <username> <password>',
+                        connectedTo: connectedTo,
+                    },
+                ])
+                return
+            }
+            
+            try {
+                // Query user from database
+                const userQuery = `SELECT name, password, permission FROM User WHERE name = '${username}'`
+                const result = db.exec(userQuery)
+                
+                if (result.length === 0 || result[0].values.length === 0) {
+                    setHistory((prev) => [
+                        ...prev,
+                        {
+                            input: cmd,
+                            output: null,
+                            error: 'LOGIN FAILED\nUser not found',
+                            connectedTo: connectedTo,
+                        },
+                    ])
+                    return
+                }
+                
+                const userData = result[0].values[0]
+                const dbPassword = userData[1] as string
+                const permission = userData[2] as number
+                
+                // Check password (handle both plain and encrypted)
+                if (password !== dbPassword) {
+                    // Try decrypting if it's encrypted
+                    try {
+                        const decryptQuery = `SELECT AES_DECRYPT('${dbPassword}', '${password.length}')`
+                        const decryptResult = db.exec(decryptQuery)
+                        const decrypted = decryptResult[0]?.values[0]?.[0] as string
+                        
+                        if (decrypted !== password) {
+                            setHistory((prev) => [
+                                ...prev,
+                                {
+                                    input: cmd,
+                                    output: null,
+                                    error: 'LOGIN FAILED\nIncorrect password',
+                                    connectedTo: connectedTo,
+                                },
+                            ])
+                            return
+                        }
+                    } catch {
+                        setHistory((prev) => [
+                            ...prev,
+                            {
+                                input: cmd,
+                                output: null,
+                                error: 'LOGIN FAILED\nIncorrect password',
+                                connectedTo: connectedTo,
+                            },
+                        ])
+                        return
+                    }
+                }
+                
+                // Login successful
+                setCurrentUser(username)
+                setUserPermission(permission)
+                setHistory((prev) => [
+                    ...prev,
+                    {
+                        input: cmd,
+                        output: null,
+                        error: null,
+                        connectedTo: connectedTo,
+                    },
+                ])
+                setHistory((prev) => [
+                    ...prev,
+                    {
+                        input: '',
+                        output: null,
+                        error: `LOGIN SUCCESSFUL\nWelcome ${username}\nPermission level: ${permission}`,
+                        connectedTo: connectedTo,
+                    },
+                ])
+                return
+            } catch (err) {
+                setHistory((prev) => [
+                    ...prev,
+                    {
+                        input: cmd,
+                        output: null,
+                        error: `LOGIN ERROR\n${err instanceof Error ? err.message : String(err)}`,
+                        connectedTo: connectedTo,
+                    },
+                ])
+                return
+            }
+        }
 
         // Check permissions based on story progress and connection context
         const permissionCheck = checkCommandPermissions(normalizedCmd, isLocal, props.gameState, connectedTo)
@@ -660,7 +790,7 @@ export default function SqlJsPage(props: {
         // Handle CONNECT command
         if (cmd.toUpperCase().startsWith('CONNECT')) {
             const parts = cmd.trim().split(/\s+/)
-            const address = parts[1] || '127.0.0.1'
+            const address = parts[1] || '174.156.12.4'
             
             // Validate IP address format
             const ipPattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/
@@ -694,6 +824,48 @@ export default function SqlJsPage(props: {
                     },
                 ])
                 return
+            }
+            
+            // Check if user has permission to access this PC
+            if (address !== '174.156.12.4') {
+                try {
+                    // Get PC permission level
+                    const pcQuery = `SELECT permission FROM PC WHERE IP = '${address}'`
+                    const pcResult = db.exec(pcQuery)
+                    
+                    if (pcResult.length === 0 || pcResult[0].values.length === 0) {
+                        setConnectionError('PC not found in network')
+                        setHistory((prev) => [
+                            ...prev,
+                            {
+                                input: cmd,
+                                output: null,
+                                error: 'ERROR: PC not found in network',
+                                connectedTo: null,
+                            },
+                        ])
+                        return
+                    }
+                    
+                    const pcPermission = pcResult[0].values[0][0] as number
+                    
+                    // Check if current user has sufficient permission
+                    if (currentUser && userPermission < pcPermission) {
+                        setConnectionError(`Access denied: insufficient permissions (required: ${pcPermission}, you have: ${userPermission})`)
+                        setHistory((prev) => [
+                            ...prev,
+                            {
+                                input: cmd,
+                                output: null,
+                                error: `ACCESS DENIED\nInsufficient permissions to access ${address}\nRequired permission level: ${pcPermission}\nYour permission level: ${userPermission}`,
+                                connectedTo: null,
+                            },
+                        ])
+                        return
+                    }
+                } catch (err) {
+                    logger.error('Error checking PC permissions:', err)
+                }
             }
             
             setConnectedTo(address)
@@ -809,7 +981,7 @@ export default function SqlJsPage(props: {
         }
 
         // Check if UPDATE command requires password (remote only)
-        if (connectedTo && connectedTo !== '127.0.0.1' && normalizedCmd.includes('UPDATE')) {
+        if (connectedTo && connectedTo !== '174.156.12.4' && normalizedCmd.includes('UPDATE')) {
             // Show the command in history
             setHistory((prev) => [
                 ...prev,
@@ -1018,7 +1190,7 @@ export default function SqlJsPage(props: {
             {history.map((entry, i) => (
                 <div key={i} className="mb-2">
                     <div>
-                        <span className="text-green-300">{entry.connectedTo ? `${entry.connectedTo}@sql` : 'sql'}&gt;</span>{" "}
+                        <span className="text-green-300">{currentUser ? `${currentUser}@${entry.connectedTo || 'sql'}` : (entry.connectedTo ? `${entry.connectedTo}@sql` : 'sql')}&gt;</span>{" "}
                         {entry.input}
                     </div>
 
@@ -1036,7 +1208,7 @@ export default function SqlJsPage(props: {
                         ))}
                     
                     {entry.input.toUpperCase().startsWith('CONNECT') && !entry.error && (
-                        <div className="text-green-400">Connected successfully to {entry.input.trim().split(/\s+/)[1] || '127.0.0.1'}</div>
+                        <div className="text-green-400">Connected successfully to {entry.input.trim().split(/\s+/)[1] || '174.156.12.4'}</div>
                     )}
                     
                     {entry.input.toUpperCase().startsWith('DISCONNECT') && !entry.error && (
@@ -1046,7 +1218,7 @@ export default function SqlJsPage(props: {
             ))}
 
             <div className="flex relative">
-                <span className="text-green-300 mr-1">{connectedTo ? `${connectedTo}@sql` : 'sql'}&gt;</span>
+                <span className="text-green-300 mr-1">{currentUser ? `${currentUser}@${connectedTo || 'sql'}` : (connectedTo ? `${connectedTo}@sql` : 'sql')}&gt;</span>
                 <div className="relative flex-1">
                     <textarea
                         ref={inputRef}
@@ -1066,7 +1238,11 @@ export default function SqlJsPage(props: {
                     {showSuggestions && suggestions.length > 0 && (
                         <div
                             ref={suggestionsRef}
-                            className="absolute left-0 top-6 bg-gray-900 border border-green-400 rounded shadow-lg z-10 min-w-[200px]"
+                            className="absolute left-0 bg-gray-900 border border-green-400 rounded shadow-lg z-10 min-w-[200px]"
+                            style={{
+                                top: `${suggestionsPosition.top}px`,
+                                left: `${suggestionsPosition.left}px`
+                            }}
                         >
                             {suggestions.map((suggestion, idx) => (
                                 <div
@@ -1115,7 +1291,7 @@ export default function SqlJsPage(props: {
                                 }
                             }}
                             className="w-full bg-black text-green-400 border border-green-400 rounded px-3 py-2 outline-none focus:border-green-300"
-                            placeholder="e.g., 192.168.1.100"
+                            placeholder="e.g., 174.156.12.4"
                             autoFocus
                         />
                         {connectionError && (

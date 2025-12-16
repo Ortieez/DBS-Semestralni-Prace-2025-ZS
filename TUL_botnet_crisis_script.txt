@@ -54,7 +54,7 @@ SUBJECT: botnet
 Hello <username>,
 
 I don't like to admit it, but I'm lost. Hope you can help me. The attack is coming from
-this IP address: ? 174.156.12.4 ? We have to figure out which device is the source and
+this IP address: 174.156.12.4 We have to figure out which device is the source and
 delete the botnet script. They have a nasty firewall, however. We need to dispose it first.
 This should work:
 

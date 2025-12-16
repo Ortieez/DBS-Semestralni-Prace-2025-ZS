@@ -1,6 +1,6 @@
 export const state = {
     username: null,
-    currentStoryEvent: "start", // Track current position in story flow
+    currentStoryEvent: "start",
     storyProgress: {
         firewall_1_beaten: false,
         firewall_2_beaten: false,
@@ -127,7 +127,7 @@ export const emails = {
         "it_expert_1": {
             "from": "itexpert@tul.cz",
             "subject": "botnet",
-            "body": "Hello <username>,\n\nI don't like to admit it, but I'm lost. Hope you can help me. The attack is comming from\nthis IP address: ? 174.156.12.4 ? We have to figure out, which device is the source and\ndelete the botnet script. They have a nasty firewall however. We need to dispose it first.\nThis should work:\n\nUPDATE Firewall\nSET status = 'inactive'\nWHERE level = 1"
+            "body": "Hello <username>,\n\nI don't like to admit it, but I'm lost. Hope you can help me. The attack is comming from\nthis IP address: 174.156.12.4 . We have to figure out, which device is the source and\ndelete the botnet script. They have a nasty firewall however. We need to dispose it first.\nThis should work:\n\nUPDATE Firewall\nSET status = 'inactive'\nWHERE level = 1"
         },
 
         "it_expert_2": {
